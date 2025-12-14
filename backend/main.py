@@ -49,6 +49,7 @@ app = FastAPI()
 origins = [
     "http://localhost:5173",  # Origen de la aplicación React
     "http://127.0.0.1:5173",  # Posiblemente también se acceda por 127.0.0.1
+    "https://trafulfrontend.onrender.com", # <<-- NUEVO: Origen del frontend desplegado
 ]
 
 app.add_middleware(
