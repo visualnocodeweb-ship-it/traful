@@ -1,15 +1,15 @@
-from fastapi import FastAPI, Depends, HTTPException
-from sqlalchemy.orm import Session
-from typing import Optional # Importar Optional para campos que pueden ser None
-import models, database
+from fastapi import FastAPI, HTTPException
 import mercadopago # Importar la librería de MercadoPago
 import os
 from dotenv import load_dotenv # Para cargar las variables de entorno
 from datetime import datetime # Para manejar fechas
 from fastapi.middleware.cors import CORSMiddleware # <<-- AÑADIR ESTA LÍNEA
+from airtable import Airtable # <<-- NUEVA IMPORTACIÓN DE AIRTABLE
 
 load_dotenv(dotenv_path=os.path.join(os.path.dirname(os.path.abspath(__file__)), ".env"))
 print(f"DEBUG: Ruta .env usada por load_dotenv: {os.path.join(os.path.dirname(os.path.abspath(__file__)), '.env')}")
+
+# Variables de entorno para MercadoPago
 MERCADOPAGO_ACCESS_TOKEN = os.getenv("MERCADOPAGO_ACCESS_TOKEN")
 print(f"DEBUG: MERCADOPAGO_ACCESS_TOKEN obtenido: {MERCADOPAGO_ACCESS_TOKEN}")
 if not MERCADOPAGO_ACCESS_TOKEN:
@@ -24,9 +24,24 @@ print(f"DEBUG: NGROK_PUBLIC_URL obtenido: {NGROK_PUBLIC_URL}")
 
 sdk = mercadopago.SDK(MERCADOPAGO_ACCESS_TOKEN)
 
+# Variables de entorno para Airtable
+AIRTABLE_API_KEY = os.getenv("AIRTABLE_API_KEY")
+AIRTABLE_BASE_ID = os.getenv("AIRTABLE_BASE_ID")
+AIRTABLE_CONTRIBUYENTES_TABLE_NAME = os.getenv("AIRTABLE_CONTRIBUYENTES_TABLE_NAME")
+AIRTABLE_PAGOS_TABLE_NAME = os.getenv("AIRTABLE_PAGOS_TABLE_NAME")
 
-# Crear todas las tablas al iniciar la aplicación
-models.Base.metadata.create_all(bind=database.engine)
+if not AIRTABLE_API_KEY:
+    raise ValueError("AIRTABLE_API_KEY no está configurado en el archivo .env")
+if not AIRTABLE_BASE_ID:
+    raise ValueError("AIRTABLE_BASE_ID no está configurado en el archivo .env")
+if not AIRTABLE_CONTRIBUYENTES_TABLE_NAME:
+    raise ValueError("AIRTABLE_CONTRIBUYENTES_TABLE_NAME no está configurado en el archivo .env")
+if not AIRTABLE_PAGOS_TABLE_NAME:
+    raise ValueError("AIRTABLE_PAGOS_TABLE_NAME no está configurado en el archivo .env")
+
+# Inicializar clientes de Airtable
+airtable_contribuyentes = Airtable(AIRTABLE_BASE_ID, AIRTABLE_CONTRIBUYENTES_TABLE_NAME, api_key=AIRTABLE_API_KEY)
+airtable_pagos = Airtable(AIRTABLE_BASE_ID, AIRTABLE_PAGOS_TABLE_NAME, api_key=AIRTABLE_API_KEY)
 
 app = FastAPI()
 
@@ -45,59 +60,61 @@ app.add_middleware(
 )
 # <<-- FIN DEL BLOQUE CORS -->>
 
-# Dependencia para obtener la sesión de la base de datos
-def get_db():
-    db = database.SessionLocal()
-    try:
-        yield db
-    finally:
-        db.close()
-
 @app.get("/")
 async def read_root():
-    return {"message": "Welcome to the Contribuyentes API"}
+    return {"message": "Welcome to the Contribuyentes API (Airtable Version)"}
 
-# Endpoint para obtener información del contribuyente por DNI
+# Endpoint para obtener información del contribuyente por DNI desde Airtable
 @app.get("/contribuyentes/{dni}")
-async def get_contribuyente(dni: str, db: Session = Depends(get_db)):
-    contribuyente = db.query(models.Contribuyente).filter(models.Contribuyente.dni == dni).first()
-    if contribuyente:
-        # Devuelve un diccionario para evitar problemas de serialización de objetos ORM directamente
+async def get_contribuyente(dni: str):
+    # Buscar el contribuyente por DNI en Airtable
+    # Airtable search devuelve una lista de registros que coinciden
+    # Asumimos que DNI es un campo único en Airtable
+    records = airtable_contribuyentes.search('dni', dni) # Buscar en el campo 'dni'
+
+    if records:
+        contribuyente_record = records[0] # Tomar el primer registro encontrado
+        fields = contribuyente_record['fields']
+        # Devolver un diccionario con los campos del contribuyente
         return {
-            "id": contribuyente.id,
-            "dni": contribuyente.dni,
-            "nombre": contribuyente.nombre,
-            "monto_mensual_impuesto": contribuyente.monto_mensual_impuesto,
-            "tipo_impuesto": contribuyente.tipo_impuesto,
-            "deuda": contribuyente.deuda,
-            "estado_suscripcion": contribuyente.estado_suscripcion,
-            "id_suscripcion_mp": contribuyente.id_suscripcion_mp,
-            "enlace_suscripcion_mp": contribuyente.enlace_suscripcion_mp,
-            "fecha_creacion": contribuyente.fecha_creacion.isoformat(), # Formato ISO para fechas
-            "ultima_actualizacion": contribuyente.ultima_actualizacion.isoformat() if contribuyente.ultima_actualizacion else None
+            "id": contribuyente_record['id'], # El ID del registro de Airtable
+            "dni": fields.get("dni"),
+            "nombre": fields.get("nombre"),
+            "monto_mensual_impuesto": fields.get("monto_mensual_impuesto"),
+            "tipo_impuesto": fields.get("tipo_impuesto"),
+            "deuda": fields.get("deuda"),
+            "estado_suscripcion": fields.get("estado_suscripcion"),
+            "id_suscripcion_mp": fields.get("id_suscripcion_mp"),
+            "enlace_suscripcion_mp": fields.get("enlace_suscripcion_mp"),
+            "fecha_creacion": fields.get("fecha_creacion"),
+            "ultima_actualizacion": fields.get("ultima_actualizacion")
         }
     raise HTTPException(status_code=404, detail="Contribuyente no encontrado")
 
 
-# Endpoint para iniciar el pago con MercadoPago
+# Endpoint para iniciar el pago con MercadoPago usando Airtable
 @app.post("/pagar")
-async def initiate_payment(dni: str, monto: float, db: Session = Depends(get_db)):
-    contribuyente = db.query(models.Contribuyente).filter(models.Contribuyente.dni == dni).first()
-    if not contribuyente:
+async def initiate_payment(dni: str, monto: float):
+    # Buscar el contribuyente por DNI en Airtable
+    records = airtable_contribuyentes.search('dni', dni)
+    if not records:
         raise HTTPException(status_code=404, detail="Contribuyente no encontrado")
+
+    contribuyente_record = records[0]
+    fields = contribuyente_record['fields']
 
     # Crear una preferencia de pago en MercadoPago
     preference_data = {
         "items": [
             {
-                "title": f"Impuesto {contribuyente.tipo_impuesto} - DNI: {dni}",
+                "title": f"Impuesto {fields.get('tipo_impuesto')} - DNI: {dni}",
                 "quantity": 1,
                 "unit_price": monto,
                 "currency_id": "ARS" # Asumimos ARS (Pesos Argentinos)
             }
         ],
         "payer": {
-            "name": contribuyente.nombre,
+            "name": fields.get('nombre'),
             "surname": "", # Se puede parsear el nombre o dejar vacío
             "email": "test_user@test.com" # Email de prueba, debería ser real
         },
@@ -112,9 +129,8 @@ async def initiate_payment(dni: str, monto: float, db: Session = Depends(get_db)
 
     try:
         preference_response = sdk.preference().create(preference_data)
-        print("MercadoPago API Full Response:", preference_response) # <-- Cambiada esta línea
+        print("MercadoPago API Full Response:", preference_response)
 
-        # Verificar si la respuesta contiene un error antes de intentar acceder a "response"
         if "status_code" in preference_response and preference_response["status_code"] >= 400:
             error_detail = preference_response.get("response", {}).get("message", "Error desconocido de MercadoPago")
             raise HTTPException(status_code=preference_response["status_code"], detail=f"Error de MercadoPago: {error_detail}")
@@ -122,39 +138,33 @@ async def initiate_payment(dni: str, monto: float, db: Session = Depends(get_db)
         if "response" not in preference_response:
              raise HTTPException(status_code=500, detail=f"Respuesta inesperada de MercadoPago: {preference_response}")
 
-
         preference = preference_response["response"]
-        payment_link = preference["init_point"] # URL para iniciar el pago
+        payment_link = preference["init_point"]
 
-        # Opcional: Actualizar el contribuyente con el enlace de pago temporal
-        # contribuyente.enlace_suscripcion_mp = payment_link
-        # db.commit()
-        # db.refresh(contribuyente)
+        # Opcional: Actualizar el contribuyente con el enlace de pago temporal en Airtable
+        # if payment_link:
+        #     airtable_contribuyentes.update(contribuyente_record['id'], {'enlace_suscripcion_mp': payment_link})
 
         return {"message": f"Payment initiated for DNI: {dni}", "payment_link": payment_link}
 
     except Exception as e:
-        # Imprimir la excepción completa para depuración
         print(f"Error detallado en initiate_payment: {e}")
         raise HTTPException(status_code=500, detail=f"Error al crear preferencia de pago: {e}")
 
 
-# Endpoint para el webhook de MercadoPago
+# Endpoint para el webhook de MercadoPago usando Airtable
 @app.post("/webhook/mercadopago")
-async def mercadopago_webhook(payload: dict, db: Session = Depends(get_db)):
-    print(f"DEBUG: Webhook Payload recibido: {payload}") # <-- Añadir esta línea para ver el payload completo
+async def mercadopago_webhook(payload: dict):
+    print(f"DEBUG: Webhook Payload recibido: {payload}")
 
     if "data" in payload and "id" in payload["data"]:
         payment_id = payload["data"]["id"]
         topic = payload.get("topic") or payload.get("type")
 
-        # <<< --- AÑADIR ESTE BLOQUE --- >>>
         if payment_id == "123456": # Es una notificación de simulación de MercadoPago
             print("DEBUG: Webhook de simulación recibido. No se procesará el pago real.")
             return {"message": "Webhook de simulación procesado correctamente (sin acción de pago real)"}
-        # <<< --- FIN DEL BLOQUE A AÑADIR --- >>>
 
-        # Dependiendo del topic, podemos buscar el tipo de recurso
         if topic == "payment":
             payment_info = sdk.payment().get(payment_id)
             if payment_info and payment_info["response"]:
@@ -164,35 +174,41 @@ async def mercadopago_webhook(payload: dict, db: Session = Depends(get_db)):
                 date_approved_str = payment_info["response"].get("date_approved")
                 date_approved = datetime.fromisoformat(date_approved_str.replace("Z", "+00:00")) if date_approved_str else datetime.now()
 
-
                 if external_reference:
-                    contribuyente = db.query(models.Contribuyente).filter(models.Contribuyente.dni == external_reference).first()
-                    if contribuyente:
-                        # Actualizar estado de suscripción del contribuyente si aplica
-                        if payment_status == "approved":
-                            contribuyente.estado_suscripcion = "Activa"
-                            contribuyente.deuda = max(0, contribuyente.deuda - transaction_amount) # Reducir deuda
-                        elif payment_status in ["rejected", "cancelled"]:
-                            contribuyente.estado_suscripcion = "Problema_Pago"
-                        db.commit()
-                        db.refresh(contribuyente)
+                    records = airtable_contribuyentes.search('dni', external_reference)
+                    if records:
+                        contribuyente_record = records[0]
+                        contribuyente_id = contribuyente_record['id']
+                        fields = contribuyente_record['fields']
 
-                        # Registrar el pago
-                        new_pago = models.Pago(
-                            contribuyente_dni=contribuyente.dni,
-                            monto_pagado=transaction_amount,
-                            id_transaccion_mp=payment_id,
-                            estado_pago=payment_status,
-                            fecha_pago_real=date_approved,
-                            metodo_registro="Webhook_MP"
-                        )
-                        db.add(new_pago)
-                        db.commit()
-                        db.refresh(new_pago)
+                        # Actualizar estado de suscripción del contribuyente en Airtable
+                        updates = {}
+                        if payment_status == "approved":
+                            updates['estado_suscripcion'] = "Activa"
+                            # Asegúrate de que 'deuda' en Airtable sea un número.
+                            current_deuda = fields.get('deuda', 0)
+                            updates['deuda'] = max(0, current_deuda - transaction_amount)
+                        elif payment_status in ["rejected", "cancelled"]:
+                            updates['estado_suscripcion'] = "Problema_Pago"
+                        
+                        if updates:
+                            airtable_contribuyentes.update(contribuyente_id, updates)
+
+                        # Registrar el pago en la tabla de pagos de Airtable
+                        new_pago_fields = {
+                            "contribuyente_dni": external_reference,
+                            "monto_pagado": transaction_amount,
+                            "id_transaccion_mp": payment_id,
+                            "estado_pago": payment_status,
+                            "fecha_pago_real": date_approved.isoformat(),
+                            "metodo_registro": "Webhook_MP"
+                        }
+                        airtable_pagos.insert(new_pago_fields)
+
                         print(f"Pago {payment_id} procesado para DNI {external_reference}. Estado: {payment_status}")
                         return {"message": "Webhook processed successfully"}
                     else:
-                        print(f"Contribuyente con DNI {external_reference} no encontrado.")
+                        print(f"Contribuyente con DNI {external_reference} no encontrado en Airtable.")
                         raise HTTPException(status_code=404, detail=f"Contribuyente con DNI {external_reference} no encontrado.")
                 else:
                     print(f"External reference no encontrada en pago {payment_id}.")
@@ -200,10 +216,6 @@ async def mercadopago_webhook(payload: dict, db: Session = Depends(get_db)):
             else:
                 print(f"Detalles de pago para ID {payment_id} no encontrados.")
                 raise HTTPException(status_code=400, detail="Detalles de pago no encontrados.")
-        # Aquí se podrían añadir más lógicas para otros topics como "preapproval" (suscripciones)
-        # elif topic == "preapproval":
-        #     # Lógica para manejar la creación o actualización de suscripciones
-        #     pass
 
     print("MercadoPago Webhook recibido (sin data.id o topic conocido):", payload)
     return {"message": "Webhook received successfully (no action taken)"}
