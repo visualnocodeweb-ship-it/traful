@@ -1,7 +1,7 @@
 from fastapi import FastAPI, Depends, HTTPException
 from sqlalchemy.orm import Session
 from typing import Optional # Importar Optional para campos que pueden ser None
-from . import models, database
+from backend import models, database
 import mercadopago # Importar la librería de MercadoPago
 import os
 from dotenv import load_dotenv # Para cargar las variables de entorno
