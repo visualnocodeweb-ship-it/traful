@@ -120,8 +120,12 @@ async def initiate_payment(dni: str, monto: float):
         ],
         "payer": {
             "name": fields.get('Nombre_Contribuyente'), # Usar Nombre_Contribuyente
-            "surname": "", # Se puede parsear el nombre o dejar vacío
-            "email": MERCADOPAGO_PAYER_EMAIL # Email de prueba configurado por variable de entorno
+            "surname": fields.get('Nombre_Contribuyente'), # Asumir el mismo nombre si no hay apellido separado
+            "email": MERCADOPAGO_PAYER_EMAIL, # Email de prueba configurado por variable de entorno
+            "identification": { # Añadir identificación del pagador
+                "type": "DNI", # O "CUIT", "CUIL", dependiendo de tu necesidad
+                "number": dni # Usamos el DNI del contribuyente como identificación del pagador
+            }
         },
         "back_urls": {
             "success": f"{BACKEND_PUBLIC_URL}/success", # <<-- USAR BACKEND_PUBLIC_URL
