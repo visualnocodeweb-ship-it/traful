@@ -1,6 +1,9 @@
 import { useState } from 'react';
 import './App.css';
 
+// Usar la variable de entorno para la URL del backend
+const BACKEND_URL = import.meta.env.VITE_APP_BACKEND_URL || 'http://localhost:8000';
+
 function App() {
   const [dni, setDni] = useState('');
   const [contribuyente, setContribuyente] = useState(null);
@@ -12,7 +15,7 @@ function App() {
     setError(null);
     setContribuyente(null);
     try {
-      const response = await fetch(`http://localhost:8000/contribuyentes/${dni}`);
+      const response = await fetch(`${BACKEND_URL}/contribuyentes/${dni}`);
       if (!response.ok) {
         throw new Error('Contribuyente no encontrado o error del servidor');
       }
@@ -31,7 +34,7 @@ function App() {
     setLoading(true);
     setError(null);
     try {
-      const response = await fetch(`http://localhost:8000/pagar?dni=${contribuyente.dni}&monto=${contribuyente.monto_mensual_impuesto}`, {
+      const response = await fetch(`${BACKEND_URL}/pagar?dni=${contribuyente.dni}&monto=${contribuyente.monto_mensual_impuesto}`, {
         method: 'POST',
         headers: {
           'Content-Type': 'application/json',
