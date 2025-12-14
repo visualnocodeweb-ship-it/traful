@@ -166,11 +166,21 @@ async def mercadopago_webhook(payload: dict):
         payment_id = payload["data"]["id"]
         topic = payload.get("topic") or payload.get("type")
 
-        if payment_id == "123456": # Es una notificación de simulación de MercadoPago
-            print("DEBUG: Webhook de simulación recibido. No se procesará el pago real.")
-            return {"message": "Webhook de simulación procesado correctamente (sin acción de pago real)"}
+        # Si es un ID de simulación, forzar los datos para probar la lógica de Airtable
+        if payment_id == "123456":
+            print("DEBUG: Webhook de simulación (ID 123456) recibido. Forzando datos para prueba de Airtable.")
+            payment_status = "approved"
+            # Asumiendo que el external_reference viene en el payload de simulación si se envían payloads de prueba más completos
+            # o podemos usar un DNI de prueba predefinido. Para esta simulación, asumiré que el payload puede tener 'external_reference'
+            # Si no viene, tendríamos que hardcodear uno aquí para la prueba.
+            external_reference = payload.get("external_reference", "16300465650") # Usar un DNI de ejemplo si no viene en el payload
+            transaction_amount = 111843.0 # Monto de prueba
+            date_approved = datetime.now()
+            # Continuar con el procesamiento como si fuera un pago real
+            # El resto del código del webhook ya procesa esto.
 
-        if topic == "payment":
+        # Si no es un ID de simulación, obtener los datos del pago real de MercadoPago
+        elif topic == "payment": # Esto era un 'if' antes, ahora es 'elif' para no entrar si ya procesamos el '123456'
             payment_info = sdk.payment().get(payment_id)
             if payment_info and payment_info["response"]:
                 payment_status = payment_info["response"]["status"]
