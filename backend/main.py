@@ -15,12 +15,10 @@ print(f"DEBUG: MERCADOPAGO_ACCESS_TOKEN obtenido: {MERCADOPAGO_ACCESS_TOKEN}")
 if not MERCADOPAGO_ACCESS_TOKEN:
     raise ValueError("MERCADOPAGO_ACCESS_TOKEN no está configurado en el archivo .env")
 
-# <<-- OBTENER NGROK_PUBLIC_URL -->>
-NGROK_PUBLIC_URL = os.getenv("NGROK_PUBLIC_URL")
-if not NGROK_PUBLIC_URL:
-    raise ValueError("NGROK_PUBLIC_URL no está configurado en el archivo .env")
-print(f"DEBUG: NGROK_PUBLIC_URL obtenido: {NGROK_PUBLIC_URL}")
-# <<-- FIN OBTENER NGROK_PUBLIC_URL -->>
+# <<-- ELIMINAMOS NGROK_PUBLIC_URL Y USAMOS LA URL FIJA DEL BACKEND -->>
+BACKEND_PUBLIC_URL = "https://traful.onrender.com"
+print(f"DEBUG: BACKEND_PUBLIC_URL configurada: {BACKEND_PUBLIC_URL}")
+# <<-- FIN NGROK_PUBLIC_URL -->>
 
 sdk = mercadopago.SDK(MERCADOPAGO_ACCESS_TOKEN)
 
@@ -121,11 +119,11 @@ async def initiate_payment(dni: str, monto: float):
             "email": "test_user@test.com" # Email de prueba, debería ser real
         },
         "back_urls": {
-            "success": f"{NGROK_PUBLIC_URL}/success", # <<-- USAR NGROK_PUBLIC_URL
-            "pending": f"{NGROK_PUBLIC_URL}/pending",
-            "failure": f"{NGROK_PUBLIC_URL}/failure",
+            "success": f"{BACKEND_PUBLIC_URL}/success", # <<-- USAR BACKEND_PUBLIC_URL
+            "pending": f"{BACKEND_PUBLIC_URL}/pending",
+            "failure": f"{BACKEND_PUBLIC_URL}/failure",
         },
-        "notification_url": f"{NGROK_PUBLIC_URL}/webhook/mercadopago", # <<-- USAR NGROK_PUBLIC_URL
+        "notification_url": f"{BACKEND_PUBLIC_URL}/webhook/mercadopago", # <<-- USAR BACKEND_PUBLIC_URL
         "external_reference": dni # Usamos el DNI como referencia externa
     }
 
