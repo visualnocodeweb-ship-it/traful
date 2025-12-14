@@ -1,6 +1,6 @@
 from sqlalchemy import Column, Integer, String, Float, DateTime, Boolean
 from sqlalchemy.sql import func
-from .database import Base
+from database import Base
 
 class Contribuyente(Base):
     __tablename__ = "contribuyentes"
