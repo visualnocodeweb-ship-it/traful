@@ -79,16 +79,17 @@ async def get_contribuyente(dni: str):
         # Devolver un diccionario con los campos del contribuyente
         return {
             "id": contribuyente_record['id'], # El ID del registro de Airtable
-            "dni": fields.get("dni"),
-            "nombre": fields.get("nombre"),
-            "monto_mensual_impuesto": fields.get("monto_mensual_impuesto"),
-            "tipo_impuesto": fields.get("tipo_impuesto"),
-            "deuda": fields.get("deuda"),
-            "estado_suscripcion": fields.get("estado_suscripcion"),
-            "id_suscripcion_mp": fields.get("id_suscripcion_mp"),
-            "enlace_suscripcion_mp": fields.get("enlace_suscripcion_mp"),
-            "fecha_creacion": fields.get("fecha_creacion"),
-            "ultima_actualizacion": fields.get("ultima_actualizacion")
+            "dni": fields.get("ID_Contribuyente"), # Usar ID_Contribuyente como DNI
+            "nombre": fields.get("Nombre_Contribuyente"), # Usar Nombre_Contribuyente
+            "monto_mensual_impuesto": fields.get("Monto_Mensual_Impuesto"),
+            "tipo_impuesto": fields.get("Tipo_Impuesto"),
+            "deuda": None, # Este campo no existe en la tabla Contribuyentes
+            "estado_suscripcion": fields.get("Estado_Suscripcion"),
+            "id_suscripcion_mp": fields.get("ID_Suscripcion_MP"),
+            "enlace_suscripcion_mp": fields.get("Enlace_Suscripcion_MP"),
+            "fecha_creacion": contribuyente_record.get('createdTime'), # Airtable tiene 'createdTime'
+            "ultima_actualizacion": None # Este campo no existe en la tabla Contribuyentes
+
         }
     raise HTTPException(status_code=404, detail="Contribuyente no encontrado")
 
@@ -108,14 +109,14 @@ async def initiate_payment(dni: str, monto: float):
     preference_data = {
         "items": [
             {
-                "title": f"Impuesto {fields.get('tipo_impuesto')} - DNI: {dni}",
+                "title": f"Impuesto {fields.get('Tipo_Impuesto')} - DNI: {dni}", # Usar Tipo_Impuesto
                 "quantity": 1,
                 "unit_price": monto,
                 "currency_id": "ARS" # Asumimos ARS (Pesos Argentinos)
             }
         ],
         "payer": {
-            "name": fields.get('nombre'),
+            "name": fields.get('Nombre_Contribuyente'), # Usar Nombre_Contribuyente
             "surname": "", # Se puede parsear el nombre o dejar vacío
             "email": "test_user@test.com" # Email de prueba, debería ser real
         },
@@ -185,24 +186,27 @@ async def mercadopago_webhook(payload: dict):
                         # Actualizar estado de suscripción del contribuyente en Airtable
                         updates = {}
                         if payment_status == "approved":
-                            updates['estado_suscripcion'] = "Activa"
-                            # Asegúrate de que 'deuda' en Airtable sea un número.
-                            current_deuda = fields.get('deuda', 0)
-                            updates['deuda'] = max(0, current_deuda - transaction_amount)
+                            updates['Estado_Suscripcion'] = "Activa" # Usar el nombre de campo correcto
+                            # La deuda no está en la tabla Contribuyentes, por lo que no se actualiza aquí.
                         elif payment_status in ["rejected", "cancelled"]:
-                            updates['estado_suscripcion'] = "Problema_Pago"
+                            updates['Estado_Suscripcion'] = "Problema_Pago" # Usar el nombre de campo correcto
                         
                         if updates:
                             airtable_contribuyentes.update(contribuyente_id, updates)
 
                         # Registrar el pago en la tabla de pagos de Airtable
+                        # Nota: El campo 'Socio' en Pagos_Mensuales es un linked record y espera un array de Record IDs.
+                        # Para asociar un pago a un contribuyente, necesitamos el Record ID del contribuyente.
                         new_pago_fields = {
-                            "contribuyente_dni": external_reference,
-                            "monto_pagado": transaction_amount,
-                            "id_transaccion_mp": payment_id,
-                            "estado_pago": payment_status,
-                            "fecha_pago_real": date_approved.isoformat(),
-                            "metodo_registro": "Webhook_MP"
+                            "ID_Pago": f"{external_reference}-{date_approved.strftime('%Y%m%d%H%M%S')}", # Generar un ID único para el pago
+                            "Socio": [contribuyente_id], # Enlazar al contribuyente usando su Record ID de Airtable
+                            "Año_Mes": date_approved.strftime('%Y-%m'),
+                            "Fecha_Pago_Real": date_approved.isoformat(),
+                            "Monto_Pagado": transaction_amount,
+                            "ID_Transaccion_MP": payment_id,
+                            "Estado_Pago": payment_status,
+                            "Metodo_Registro": "Webhook_MP",
+                            "Fecha_Registro": datetime.now().isoformat()
                         }
                         airtable_pagos.insert(new_pago_fields)
 
