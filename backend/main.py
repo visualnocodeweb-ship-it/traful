@@ -15,6 +15,11 @@ print(f"DEBUG: MERCADOPAGO_ACCESS_TOKEN obtenido: {MERCADOPAGO_ACCESS_TOKEN}")
 if not MERCADOPAGO_ACCESS_TOKEN:
     raise ValueError("MERCADOPAGO_ACCESS_TOKEN no está configurado en el archivo .env")
 
+MERCADOPAGO_PAYER_EMAIL = os.getenv("MERCADOPAGO_PAYER_EMAIL")
+if not MERCADOPAGO_PAYER_EMAIL:
+    raise ValueError("MERCADOPAGO_PAYER_EMAIL no está configurado en el archivo .env")
+print(f"DEBUG: MERCADOPAGO_PAYER_EMAIL obtenido: {MERCADOPAGO_PAYER_EMAIL}")
+
 # <<-- ELIMINAMOS NGROK_PUBLIC_URL Y USAMOS LA URL FIJA DEL BACKEND -->>
 BACKEND_PUBLIC_URL = "https://traful.onrender.com"
 print(f"DEBUG: BACKEND_PUBLIC_URL configurada: {BACKEND_PUBLIC_URL}")
@@ -116,7 +121,7 @@ async def initiate_payment(dni: str, monto: float):
         "payer": {
             "name": fields.get('Nombre_Contribuyente'), # Usar Nombre_Contribuyente
             "surname": "", # Se puede parsear el nombre o dejar vacío
-            "email": "test_user@test.com" # Email de prueba, debería ser real
+            "email": MERCADOPAGO_PAYER_EMAIL # Email de prueba configurado por variable de entorno
         },
         "back_urls": {
             "success": f"{BACKEND_PUBLIC_URL}/success", # <<-- USAR BACKEND_PUBLIC_URL
