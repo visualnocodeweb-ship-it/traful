@@ -70,7 +70,7 @@ async def get_contribuyente(dni: str):
     # Buscar el contribuyente por DNI en Airtable
     # Airtable search devuelve una lista de registros que coinciden
     # Asumimos que DNI es un campo único en Airtable
-    records = airtable_contribuyentes.search('dni', dni) # Buscar en el campo 'dni'
+    records = airtable_contribuyentes.search('ID_Contribuyente', dni) # Buscar en el campo 'ID_Contribuyente'
 
     if records:
         contribuyente_record = records[0] # Tomar el primer registro encontrado
@@ -96,7 +96,7 @@ async def get_contribuyente(dni: str):
 @app.post("/pagar")
 async def initiate_payment(dni: str, monto: float):
     # Buscar el contribuyente por DNI en Airtable
-    records = airtable_contribuyentes.search('dni', dni)
+    records = airtable_contribuyentes.search('ID_Contribuyente', dni)
     if not records:
         raise HTTPException(status_code=404, detail="Contribuyente no encontrado")
 
@@ -175,7 +175,7 @@ async def mercadopago_webhook(payload: dict):
                 date_approved = datetime.fromisoformat(date_approved_str.replace("Z", "+00:00")) if date_approved_str else datetime.now()
 
                 if external_reference:
-                    records = airtable_contribuyentes.search('dni', external_reference)
+                    records = airtable_contribuyentes.search('ID_Contribuyente', external_reference)
                     if records:
                         contribuyente_record = records[0]
                         contribuyente_id = contribuyente_record['id']
