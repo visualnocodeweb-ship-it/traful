@@ -1,0 +1,5823 @@
+{
+  "name": "## 🏈 Workflow 1: Crear Suscripción SIMPLE v4.0",
+  "nodes": [
+    {
+      "parameters": {
+        "path": "webhook-crear-suscripcion-club",
+        "options": {
+          "responseData": "Creando/Actualizando suscripción..."
+        }
+      },
+      "id": "71a60550-93d9-4bdd-87db-3857076c7fc3",
+      "name": "🔗 Webhook - Botón Airtable",
+      "type": "n8n-nodes-base.webhook",
+      "position": [
+        -1456,
+        1696
+      ],
+      "typeVersion": 2.1,
+      "webhookId": "e1f0fb04-1ea3-4d86-a56e-6684a4b274d4"
+    },
+    {
+      "parameters": {
+        "content": "## 🏈 Workflow 1: Crear Suscripción SIMPLE v4.0\n\n**Trigger:** Botón 'Crear_Suscripcion' en Airtable\n**Proceso SIMPLE:**\n1. Recibe record_id del socio\n2. Obtiene datos del socio y configuración\n3. Mapea categoría → Plan_ID\n4. ✅ GENERA URL: plan + &external_reference=DNI\n5. Actualiza Airtable con URL generada\n6. Envía WhatsApp con link directo\n7. Registra log del proceso\n\n**SIN API MercadoPago** - Solo generación de URL\n**URL Final:** https://www.mercadopago.com.ar/subscriptions/checkout?preapproval_plan_id=PLAN&external_reference=DNI\n\n**✅ MIGRADO:** Nodos nativos Airtable",
+        "height": 800,
+        "width": 720
+      },
+      "id": "afc71a94-8280-45d6-8a5d-bed812648669",
+      "name": "🏈 WORKFLOW 1: CREAR SUSCRIPCIÓN SIMPLE v4.0",
+      "type": "n8n-nodes-base.stickyNote",
+      "position": [
+        -1536,
+        1264
+      ],
+      "typeVersion": 1
+    },
+    {
+      "parameters": {
+        "base": {
+          "__rl": true,
+          "value": "appIM8X2lshRuKnQb",
+          "mode": "list",
+          "cachedResultName": "Club de Futbol"
+        },
+        "table": {
+          "__rl": true,
+          "value": "tbl0oONKSWiRuqX67",
+          "mode": "list",
+          "cachedResultName": "Socios",
+          "cachedResultUrl": "https://airtable.com/appIM8X2lshRuKnQb/tbl0oONKSWiRuqX67"
+        },
+        "id": "={{ $json.query.record_id }}",
+        "options": {}
+      },
+      "id": "0f326e56-ed17-4554-baf8-f4827cf8cf22",
+      "name": "📊 Obtener Datos del Socio",
+      "type": "n8n-nodes-base.airtable",
+      "position": [
+        -1200,
+        1696
+      ],
+      "typeVersion": 2.1,
+      "retryOnFail": true,
+      "credentials": {
+        "airtableTokenApi": {
+          "id": "Nj7unxgUbkJOdf1K",
+          "name": "Fulbo"
+        }
+      }
+    },
+    {
+      "parameters": {
+        "content": "## 🔗 Proceso de Generación URL SIMPLE\n\n**1. URL Base del Plan:**\nhttps://www.mercadopago.com.ar/subscriptions/checkout?preapproval_plan_id=PLAN_ID\n\n**2. Agregar External Reference:**\n&external_reference=DNI_SOCIO\n\n**3. URL Final Generada:**\nhttps://www.mercadopago.com.ar/subscriptions/checkout?preapproval_plan_id=32da68eec7b7496ebc753fbcdef1ef03&external_reference=12345678\n\n**✅ VENTAJAS:**\n- Sin llamadas API complejas\n- Sin errores de card_token\n- Proceso instantáneo\n- MercadoPago maneja todo el checkout\n- External reference para identificación\n\n**✅ MIGRADO:** Nodos nativos Airtable ✅",
+        "height": 864,
+        "width": 720
+      },
+      "id": "309b22bf-e225-46ed-96e4-115e54324f82",
+      "name": "🔗 GENERACIÓN URL SIMPLE",
+      "type": "n8n-nodes-base.stickyNote",
+      "position": [
+        -768,
+        1248
+      ],
+      "typeVersion": 1
+    },
+    {
+      "parameters": {
+        "operation": "search",
+        "base": {
+          "__rl": true,
+          "value": "appIM8X2lshRuKnQb",
+          "mode": "list",
+          "cachedResultName": "Club de Futbol",
+          "cachedResultUrl": "https://airtable.com/appIM8X2lshRuKnQb"
+        },
+        "table": {
+          "__rl": true,
+          "value": "tblUFGgtNH97Ljm2L",
+          "mode": "list",
+          "cachedResultName": "Planes",
+          "cachedResultUrl": "https://airtable.com/appIM8X2lshRuKnQb/tblUFGgtNH97Ljm2L"
+        },
+        "filterByFormula": "=",
+        "options": {}
+      },
+      "id": "d20b2dd2-d0ee-4243-8d44-b28d556ae2c4",
+      "name": "Obtener Configuración Planes",
+      "type": "n8n-nodes-base.airtable",
+      "position": [
+        -1024,
+        384
+      ],
+      "typeVersion": 2.1
+    },
+    {
+      "parameters": {},
+      "type": "n8n-nodes-base.switch",
+      "typeVersion": 3.3,
+      "position": [
+        -496,
+        512
+      ],
+      "id": "4eb12e17-0b7b-4492-924f-b844513e39dd",
+      "name": "Switch"
+    },
+    {
+      "parameters": {
+        "method": "POST",
+        "url": "https://api.mercadopago.com/preapproval_plan",
+        "sendHeaders": true,
+        "headerParameters": {
+          "parameters": [
+            {
+              "name": "Content-Type",
+              "value": "application/json"
+            },
+            {
+              "name": "Authorization",
+              "value": "Bearer APP_USR-1575907424726657-111310-7a725029aa4094e75e3fe1db2b513a61-2677689551"
+            }
+          ]
+        },
+        "sendBody": true,
+        "specifyBody": "json",
+        "jsonBody": "={\n  \"reason\": \"{{ $json[\"Descripción\"] }}\",\n  \"auto_recurring\": {\n    \"frequency\": 1,\n    \"frequency_type\": \"months\",\n    \"transaction_amount\": {{ $json.Monto }},\n    \"currency_id\": \"ARS\"\n  },\n  \"back_url\": \"https://mercadopago.com.ar\",\n  \"external_reference\": \"{{ $('📊 Obtener Datos del Socio').item.json.DNI }}\"\n}\n",
+        "options": {
+          "response": {
+            "response": {
+              "neverError": true
+            }
+          }
+        }
+      },
+      "id": "16255f03-1a8f-4362-9628-8da0632eb018",
+      "name": "🆕 Crear Plan MP",
+      "type": "n8n-nodes-base.httpRequest",
+      "position": [
+        0,
+        192
+      ],
+      "typeVersion": 4
+    },
+    {
+      "parameters": {
+        "method": "PUT",
+        "url": "=https://api.mercadopago.com/preapproval_plan/{{ $('📊 Obtener Datos del Socio').item.json.ID_Suscripcion_MP }}",
+        "sendHeaders": true,
+        "headerParameters": {
+          "parameters": [
+            {
+              "name": "Content-Type",
+              "value": "application/json"
+            },
+            {
+              "name": "Authorization",
+              "value": "Bearer APP_USR-1575907424726657-111310-7a725029aa4094e75e3fe1db2b513a61-2677689551"
+            }
+          ]
+        },
+        "sendBody": true,
+        "specifyBody": "json",
+        "jsonBody": "={\n  \"reason\": \"{{ $json[\"Descripción\"] }}\",\n  \"auto_recurring\": {\n    \"frequency\": 1,\n    \"frequency_type\": \"months\",\n    \"transaction_amount\": {{ $json.Monto }},\n    \"billing_day_proportional\": true,\n    \"currency_id\": \"ARS\"\n  },\n  \"back_url\": \"https://mercadopago.com.ar/\",\n  \"external_reference\": \"{{ $('📊 Obtener Datos del Socio').item.json.DNI }}\"\n}\n",
+        "options": {
+          "response": {
+            "response": {
+              "neverError": true
+            }
+          }
+        }
+      },
+      "id": "9bb6da7c-e710-4bfb-86e3-b11efd086bca",
+      "name": "🔄 Actualizar Plan MP",
+      "type": "n8n-nodes-base.httpRequest",
+      "position": [
+        0,
+        0
+      ],
+      "typeVersion": 4
+    },
+    {
+      "parameters": {
+        "operation": "upsert",
+        "base": {
+          "__rl": true,
+          "value": "appIM8X2lshRuKnQb",
+          "mode": "list",
+          "cachedResultName": "Club de Futbol",
+          "cachedResultUrl": "https://airtable.com/appIM8X2lshRuKnQb"
+        },
+        "table": {
+          "__rl": true,
+          "value": "tbl0oONKSWiRuqX67",
+          "mode": "list",
+          "cachedResultName": "Socios",
+          "cachedResultUrl": "https://airtable.com/appIM8X2lshRuKnQb/tbl0oONKSWiRuqX67"
+        },
+        "columns": {
+          "mappingMode": "defineBelow",
+          "value": {
+            "id": "={{ $('📊 Obtener Datos del Socio').item.json.id }}",
+            "ID_Suscripcion_MP": "={{ $json.id }}",
+            "Enlace_Suscripcion_MP": "={{ $json.init_point }}",
+            "Estado_Suscripcion": "Pendiente"
+          },
+          "matchingColumns": [
+            "id"
+          ],
+          "schema": [
+            {
+              "id": "id",
+              "displayName": "id",
+              "required": false,
+              "defaultMatch": true,
+              "display": true,
+              "type": "string",
+              "readOnly": true
+            },
+            {
+              "id": "Nombre_Completo",
+              "displayName": "Nombre_Completo",
+              "required": false,
+              "defaultMatch": false,
+              "canBeUsedToMatch": true,
+              "display": true,
+              "type": "string",
+              "readOnly": false,
+              "removed": true
+            },
+            {
+              "id": "DNI",
+              "displayName": "DNI",
+              "required": false,
+              "defaultMatch": false,
+              "canBeUsedToMatch": true,
+              "display": true,
+              "type": "string",
+              "readOnly": false,
+              "removed": true
+            },
+            {
+              "id": "Fecha_Nacimiento",
+              "displayName": "Fecha_Nacimiento",
+              "required": false,
+              "defaultMatch": false,
+              "canBeUsedToMatch": true,
+              "display": true,
+              "type": "dateTime",
+              "readOnly": false,
+              "removed": true
+            },
+            {
+              "id": "WhatsApp",
+              "displayName": "WhatsApp",
+              "required": false,
+              "defaultMatch": false,
+              "canBeUsedToMatch": true,
+              "display": true,
+              "type": "string",
+              "readOnly": false,
+              "removed": true
+            },
+            {
+              "id": "Categoría",
+              "displayName": "Categoría",
+              "required": false,
+              "defaultMatch": false,
+              "canBeUsedToMatch": true,
+              "display": true,
+              "type": "array",
+              "readOnly": false,
+              "removed": true
+            },
+            {
+              "id": "Monto",
+              "displayName": "Monto",
+              "required": false,
+              "defaultMatch": false,
+              "canBeUsedToMatch": true,
+              "display": true,
+              "type": "string",
+              "readOnly": true,
+              "removed": true
+            },
+            {
+              "id": "Fecha_Inscripcion",
+              "displayName": "Fecha_Inscripcion",
+              "required": false,
+              "defaultMatch": false,
+              "canBeUsedToMatch": true,
+              "display": true,
+              "type": "dateTime",
+              "readOnly": false,
+              "removed": true
+            },
+            {
+              "id": "Estado_Socio",
+              "displayName": "Estado_Socio",
+              "required": false,
+              "defaultMatch": false,
+              "canBeUsedToMatch": true,
+              "display": true,
+              "type": "options",
+              "options": [
+                {
+                  "name": "Activo",
+                  "value": "Activo"
+                },
+                {
+                  "name": "Inactivo",
+                  "value": "Inactivo"
+                },
+                {
+                  "name": "Suspendido",
+                  "value": "Suspendido"
+                }
+              ],
+              "readOnly": false,
+              "removed": true
+            },
+            {
+              "id": "ID_Suscripcion_MP",
+              "displayName": "ID_Suscripcion_MP",
+              "required": false,
+              "defaultMatch": false,
+              "canBeUsedToMatch": true,
+              "display": true,
+              "type": "string",
+              "readOnly": false,
+              "removed": false
+            },
+            {
+              "id": "Enlace_Suscripcion_MP",
+              "displayName": "Enlace_Suscripcion_MP",
+              "required": false,
+              "defaultMatch": false,
+              "canBeUsedToMatch": true,
+              "display": true,
+              "type": "string",
+              "readOnly": false,
+              "removed": false
+            },
+            {
+              "id": "Estado_Suscripcion",
+              "displayName": "Estado_Suscripcion",
+              "required": false,
+              "defaultMatch": false,
+              "canBeUsedToMatch": true,
+              "display": true,
+              "type": "options",
+              "options": [
+                {
+                  "name": "Pendiente",
+                  "value": "Pendiente"
+                },
+                {
+                  "name": "Activa",
+                  "value": "Activa"
+                },
+                {
+                  "name": "Cancelada",
+                  "value": "Cancelada"
+                }
+              ],
+              "readOnly": false,
+              "removed": false
+            },
+            {
+              "id": "Crear Suscripción",
+              "displayName": "Crear Suscripción",
+              "required": false,
+              "defaultMatch": false,
+              "canBeUsedToMatch": true,
+              "display": true,
+              "type": "string",
+              "readOnly": true,
+              "removed": true
+            },
+            {
+              "id": "Cancelar Suscripción",
+              "displayName": "Cancelar Suscripción",
+              "required": false,
+              "defaultMatch": false,
+              "canBeUsedToMatch": true,
+              "display": true,
+              "type": "string",
+              "readOnly": true,
+              "removed": true
+            },
+            {
+              "id": "Fecha_Creacion_Suscripcion",
+              "displayName": "Fecha_Creacion_Suscripcion",
+              "required": false,
+              "defaultMatch": false,
+              "canBeUsedToMatch": true,
+              "display": true,
+              "type": "dateTime",
+              "readOnly": false,
+              "removed": true
+            },
+            {
+              "id": "Email_madre_Padre",
+              "displayName": "Email_madre_Padre",
+              "required": false,
+              "defaultMatch": false,
+              "canBeUsedToMatch": true,
+              "display": true,
+              "type": "string",
+              "readOnly": false,
+              "removed": true
+            },
+            {
+              "id": "Edad_Actual",
+              "displayName": "Edad_Actual",
+              "required": false,
+              "defaultMatch": false,
+              "canBeUsedToMatch": true,
+              "display": true,
+              "type": "string",
+              "readOnly": true,
+              "removed": true
+            },
+            {
+              "id": "Ultimo_Pago_Registrado",
+              "displayName": "Ultimo_Pago_Registrado",
+              "required": false,
+              "defaultMatch": false,
+              "canBeUsedToMatch": true,
+              "display": true,
+              "type": "dateTime",
+              "readOnly": false,
+              "removed": true
+            },
+            {
+              "id": "Meses_Adeudados",
+              "displayName": "Meses_Adeudados",
+              "required": false,
+              "defaultMatch": false,
+              "canBeUsedToMatch": true,
+              "display": true,
+              "type": "number",
+              "readOnly": false,
+              "removed": true
+            },
+            {
+              "id": "Total_Deuda",
+              "displayName": "Total_Deuda",
+              "required": false,
+              "defaultMatch": false,
+              "canBeUsedToMatch": true,
+              "display": true,
+              "type": "number",
+              "readOnly": false,
+              "removed": true
+            },
+            {
+              "id": "Notas",
+              "displayName": "Notas",
+              "required": false,
+              "defaultMatch": false,
+              "canBeUsedToMatch": true,
+              "display": true,
+              "type": "string",
+              "readOnly": false,
+              "removed": true
+            },
+            {
+              "id": "Pagos_Mensuales",
+              "displayName": "Pagos_Mensuales",
+              "required": false,
+              "defaultMatch": false,
+              "canBeUsedToMatch": true,
+              "display": true,
+              "type": "array",
+              "readOnly": false,
+              "removed": true
+            },
+            {
+              "id": "Padres",
+              "displayName": "Padres",
+              "required": false,
+              "defaultMatch": false,
+              "canBeUsedToMatch": true,
+              "display": true,
+              "type": "array",
+              "readOnly": false,
+              "removed": true
+            },
+            {
+              "id": "Accion_Suscripcion",
+              "displayName": "Accion_Suscripcion",
+              "required": false,
+              "defaultMatch": false,
+              "canBeUsedToMatch": true,
+              "display": true,
+              "type": "options",
+              "options": [
+                {
+                  "name": "Crear_Suscripcion",
+                  "value": "Crear_Suscripcion"
+                },
+                {
+                  "name": "Cancelar_Suscripcion",
+                  "value": "Cancelar_Suscripcion"
+                },
+                {
+                  "name": "Sin_Accion",
+                  "value": "Sin_Accion"
+                }
+              ],
+              "readOnly": false,
+              "removed": true
+            },
+            {
+              "id": "Procesado_Accion",
+              "displayName": "Procesado_Accion",
+              "required": false,
+              "defaultMatch": false,
+              "canBeUsedToMatch": true,
+              "display": true,
+              "type": "dateTime",
+              "readOnly": false,
+              "removed": true
+            },
+            {
+              "id": "Fecha_Ultimo_Problema_Pago",
+              "displayName": "Fecha_Ultimo_Problema_Pago",
+              "required": false,
+              "defaultMatch": false,
+              "canBeUsedToMatch": true,
+              "display": true,
+              "type": "dateTime",
+              "readOnly": false,
+              "removed": true
+            },
+            {
+              "id": "Intentos_Renovacion",
+              "displayName": "Intentos_Renovacion",
+              "required": false,
+              "defaultMatch": false,
+              "canBeUsedToMatch": true,
+              "display": true,
+              "type": "number",
+              "readOnly": false,
+              "removed": true
+            }
+          ],
+          "attemptToConvertTypes": false,
+          "convertFieldsToString": false
+        },
+        "options": {
+          "typecast": true
+        }
+      },
+      "type": "n8n-nodes-base.airtable",
+      "typeVersion": 2.1,
+      "position": [
+        240,
+        192
+      ],
+      "id": "e9de5541-1ece-4af4-9bcb-ed13cb4835fc",
+      "name": "Create or update a record"
+    },
+    {
+      "parameters": {
+        "operation": "upsert",
+        "base": {
+          "__rl": true,
+          "value": "appIM8X2lshRuKnQb",
+          "mode": "list",
+          "cachedResultName": "Club de Futbol",
+          "cachedResultUrl": "https://airtable.com/appIM8X2lshRuKnQb"
+        },
+        "table": {
+          "__rl": true,
+          "value": "tbl0oONKSWiRuqX67",
+          "mode": "list",
+          "cachedResultName": "Socios",
+          "cachedResultUrl": "https://airtable.com/appIM8X2lshRuKnQb/tbl0oONKSWiRuqX67"
+        },
+        "columns": {
+          "mappingMode": "defineBelow",
+          "value": {
+            "id": "={{ $('📊 Obtener Datos del Socio').item.json.id }}",
+            "ID_Suscripcion_MP": "={{ $json.id }}",
+            "Enlace_Suscripcion_MP": "={{ $json.init_point }}",
+            "Estado_Suscripcion": "Activa",
+            "Fecha_última_Actualizacion": "={{ $json.last_modified }}"
+          },
+          "matchingColumns": [
+            "id"
+          ],
+          "schema": [
+            {
+              "id": "id",
+              "displayName": "id",
+              "required": false,
+              "defaultMatch": true,
+              "display": true,
+              "type": "string",
+              "readOnly": true,
+              "removed": false
+            },
+            {
+              "id": "Nombre_Completo",
+              "displayName": "Nombre_Completo",
+              "required": false,
+              "defaultMatch": false,
+              "canBeUsedToMatch": true,
+              "display": true,
+              "type": "string",
+              "readOnly": false,
+              "removed": true
+            },
+            {
+              "id": "DNI",
+              "displayName": "DNI",
+              "required": false,
+              "defaultMatch": false,
+              "canBeUsedToMatch": true,
+              "display": true,
+              "type": "string",
+              "readOnly": false,
+              "removed": true
+            },
+            {
+              "id": "Fecha_Nacimiento",
+              "displayName": "Fecha_Nacimiento",
+              "required": false,
+              "defaultMatch": false,
+              "canBeUsedToMatch": true,
+              "display": true,
+              "type": "dateTime",
+              "readOnly": false,
+              "removed": true
+            },
+            {
+              "id": "WhatsApp",
+              "displayName": "WhatsApp",
+              "required": false,
+              "defaultMatch": false,
+              "canBeUsedToMatch": true,
+              "display": true,
+              "type": "string",
+              "readOnly": false,
+              "removed": true
+            },
+            {
+              "id": "Categoría",
+              "displayName": "Categoría",
+              "required": false,
+              "defaultMatch": false,
+              "canBeUsedToMatch": true,
+              "display": true,
+              "type": "array",
+              "readOnly": false,
+              "removed": true
+            },
+            {
+              "id": "Categoria (from Categoría)",
+              "displayName": "Categoria (from Categoría)",
+              "required": false,
+              "defaultMatch": false,
+              "canBeUsedToMatch": true,
+              "display": true,
+              "type": "string",
+              "readOnly": true,
+              "removed": true
+            },
+            {
+              "id": "Monto",
+              "displayName": "Monto",
+              "required": false,
+              "defaultMatch": false,
+              "canBeUsedToMatch": true,
+              "display": true,
+              "type": "string",
+              "readOnly": true,
+              "removed": true
+            },
+            {
+              "id": "Fecha_Inscripcion",
+              "displayName": "Fecha_Inscripcion",
+              "required": false,
+              "defaultMatch": false,
+              "canBeUsedToMatch": true,
+              "display": true,
+              "type": "dateTime",
+              "readOnly": false,
+              "removed": true
+            },
+            {
+              "id": "Estado_Socio",
+              "displayName": "Estado_Socio",
+              "required": false,
+              "defaultMatch": false,
+              "canBeUsedToMatch": true,
+              "display": true,
+              "type": "options",
+              "options": [
+                {
+                  "name": "Activo",
+                  "value": "Activo"
+                },
+                {
+                  "name": "Inactivo",
+                  "value": "Inactivo"
+                },
+                {
+                  "name": "Suspendido",
+                  "value": "Suspendido"
+                }
+              ],
+              "readOnly": false,
+              "removed": true
+            },
+            {
+              "id": "ID_Suscripcion_MP",
+              "displayName": "ID_Suscripcion_MP",
+              "required": false,
+              "defaultMatch": false,
+              "canBeUsedToMatch": true,
+              "display": true,
+              "type": "string",
+              "readOnly": false,
+              "removed": false
+            },
+            {
+              "id": "Enlace_Suscripcion_MP",
+              "displayName": "Enlace_Suscripcion_MP",
+              "required": false,
+              "defaultMatch": false,
+              "canBeUsedToMatch": true,
+              "display": true,
+              "type": "string",
+              "readOnly": false,
+              "removed": false
+            },
+            {
+              "id": "Estado_Suscripcion",
+              "displayName": "Estado_Suscripcion",
+              "required": false,
+              "defaultMatch": false,
+              "canBeUsedToMatch": true,
+              "display": true,
+              "type": "options",
+              "options": [
+                {
+                  "name": "Pendiente",
+                  "value": "Pendiente"
+                },
+                {
+                  "name": "Activa",
+                  "value": "Activa"
+                },
+                {
+                  "name": "Cancelada",
+                  "value": "Cancelada"
+                },
+                {
+                  "name": "Pausada por error en pago",
+                  "value": "Pausada por error en pago"
+                }
+              ],
+              "readOnly": false,
+              "removed": false
+            },
+            {
+              "id": "Último Pago",
+              "displayName": "Último Pago",
+              "required": false,
+              "defaultMatch": false,
+              "canBeUsedToMatch": true,
+              "display": true,
+              "type": "options",
+              "options": [
+                {
+                  "name": "Aprobado",
+                  "value": "Aprobado"
+                },
+                {
+                  "name": "Rechazado",
+                  "value": "Rechazado"
+                }
+              ],
+              "readOnly": false,
+              "removed": true
+            },
+            {
+              "id": "Crear Suscripción",
+              "displayName": "Crear Suscripción",
+              "required": false,
+              "defaultMatch": false,
+              "canBeUsedToMatch": true,
+              "display": true,
+              "type": "string",
+              "readOnly": true,
+              "removed": true
+            },
+            {
+              "id": "Fecha_Primer_Pago",
+              "displayName": "Fecha_Primer_Pago",
+              "required": false,
+              "defaultMatch": false,
+              "canBeUsedToMatch": true,
+              "display": true,
+              "type": "dateTime",
+              "readOnly": false,
+              "removed": true
+            },
+            {
+              "id": "Actualizar monto/categoria",
+              "displayName": "Actualizar monto/categoria",
+              "required": false,
+              "defaultMatch": false,
+              "canBeUsedToMatch": true,
+              "display": true,
+              "type": "string",
+              "readOnly": true,
+              "removed": true
+            },
+            {
+              "id": "Fecha_última_Actualizacion",
+              "displayName": "Fecha_última_Actualizacion",
+              "required": false,
+              "defaultMatch": false,
+              "canBeUsedToMatch": true,
+              "display": true,
+              "type": "dateTime",
+              "readOnly": false,
+              "removed": false
+            },
+            {
+              "id": "Cancelar Suscripción",
+              "displayName": "Cancelar Suscripción",
+              "required": false,
+              "defaultMatch": false,
+              "canBeUsedToMatch": true,
+              "display": true,
+              "type": "string",
+              "readOnly": true,
+              "removed": true
+            },
+            {
+              "id": "Email_madre_Padre",
+              "displayName": "Email_madre_Padre",
+              "required": false,
+              "defaultMatch": false,
+              "canBeUsedToMatch": true,
+              "display": true,
+              "type": "string",
+              "readOnly": false,
+              "removed": true
+            },
+            {
+              "id": "Edad_Actual",
+              "displayName": "Edad_Actual",
+              "required": false,
+              "defaultMatch": false,
+              "canBeUsedToMatch": true,
+              "display": true,
+              "type": "string",
+              "readOnly": true,
+              "removed": true
+            },
+            {
+              "id": "Ultimo_Pago_Registrado",
+              "displayName": "Ultimo_Pago_Registrado",
+              "required": false,
+              "defaultMatch": false,
+              "canBeUsedToMatch": true,
+              "display": true,
+              "type": "dateTime",
+              "readOnly": false,
+              "removed": true
+            },
+            {
+              "id": "Meses_Adeudados",
+              "displayName": "Meses_Adeudados",
+              "required": false,
+              "defaultMatch": false,
+              "canBeUsedToMatch": true,
+              "display": true,
+              "type": "number",
+              "readOnly": false,
+              "removed": true
+            },
+            {
+              "id": "Total_Deuda",
+              "displayName": "Total_Deuda",
+              "required": false,
+              "defaultMatch": false,
+              "canBeUsedToMatch": true,
+              "display": true,
+              "type": "number",
+              "readOnly": false,
+              "removed": true
+            },
+            {
+              "id": "Notas",
+              "displayName": "Notas",
+              "required": false,
+              "defaultMatch": false,
+              "canBeUsedToMatch": true,
+              "display": true,
+              "type": "string",
+              "readOnly": false,
+              "removed": true
+            },
+            {
+              "id": "Pagos_Mensuales",
+              "displayName": "Pagos_Mensuales",
+              "required": false,
+              "defaultMatch": false,
+              "canBeUsedToMatch": true,
+              "display": true,
+              "type": "array",
+              "readOnly": false,
+              "removed": true
+            },
+            {
+              "id": "Padres",
+              "displayName": "Padres",
+              "required": false,
+              "defaultMatch": false,
+              "canBeUsedToMatch": true,
+              "display": true,
+              "type": "array",
+              "readOnly": false,
+              "removed": true
+            },
+            {
+              "id": "Procesado_Accion",
+              "displayName": "Procesado_Accion",
+              "required": false,
+              "defaultMatch": false,
+              "canBeUsedToMatch": true,
+              "display": true,
+              "type": "dateTime",
+              "readOnly": false,
+              "removed": true
+            },
+            {
+              "id": "Fecha_Ultimo_Problema_Pago",
+              "displayName": "Fecha_Ultimo_Problema_Pago",
+              "required": false,
+              "defaultMatch": false,
+              "canBeUsedToMatch": true,
+              "display": true,
+              "type": "dateTime",
+              "readOnly": false,
+              "removed": true
+            },
+            {
+              "id": "Intentos_Renovacion",
+              "displayName": "Intentos_Renovacion",
+              "required": false,
+              "defaultMatch": false,
+              "canBeUsedToMatch": true,
+              "display": true,
+              "type": "number",
+              "readOnly": false,
+              "removed": true
+            }
+          ],
+          "attemptToConvertTypes": false,
+          "convertFieldsToString": false
+        },
+        "options": {
+          "typecast": true
+        }
+      },
+      "type": "n8n-nodes-base.airtable",
+      "typeVersion": 2.1,
+      "position": [
+        240,
+        0
+      ],
+      "id": "e1f3b6f5-4106-4e9d-b855-5daff835cb96",
+      "name": "Create or update a record1"
+    },
+    {
+      "parameters": {
+        "operation": "create",
+        "base": {
+          "__rl": true,
+          "value": "appIM8X2lshRuKnQb",
+          "mode": "list",
+          "cachedResultName": "Club de Futbol",
+          "cachedResultUrl": "https://airtable.com/appIM8X2lshRuKnQb"
+        },
+        "table": {
+          "__rl": true,
+          "value": "tbl5aFVyWrkKph8Gj",
+          "mode": "list",
+          "cachedResultName": "Logs_Sistema",
+          "cachedResultUrl": "https://airtable.com/appIM8X2lshRuKnQb/tbl5aFVyWrkKph8Gj"
+        },
+        "columns": {
+          "mappingMode": "defineBelow",
+          "value": {
+            "Timestamp": "={{ $now }}",
+            "Evento": "Suscripción_Actualizada",
+            "Origen": "n8n",
+            "Detalles": "=Actualziacion: {{ $json.fields.Plan }}",
+            "Estado_Resultado": "Exitoso"
+          },
+          "matchingColumns": [],
+          "schema": [
+            {
+              "id": "ID_Log",
+              "displayName": "ID_Log",
+              "required": false,
+              "defaultMatch": false,
+              "canBeUsedToMatch": true,
+              "display": true,
+              "type": "string",
+              "readOnly": false,
+              "removed": true
+            },
+            {
+              "id": "Timestamp",
+              "displayName": "Timestamp",
+              "required": false,
+              "defaultMatch": false,
+              "canBeUsedToMatch": true,
+              "display": true,
+              "type": "dateTime",
+              "readOnly": false,
+              "removed": false
+            },
+            {
+              "id": "Evento",
+              "displayName": "Evento",
+              "required": false,
+              "defaultMatch": false,
+              "canBeUsedToMatch": true,
+              "display": true,
+              "type": "options",
+              "options": [
+                {
+                  "name": "Suscripcion_Creada",
+                  "value": "Suscripcion_Creada"
+                },
+                {
+                  "name": "Suscripcion_Cancelada",
+                  "value": "Suscripcion_Cancelada"
+                },
+                {
+                  "name": "Pago_Procesado",
+                  "value": "Pago_Procesado"
+                },
+                {
+                  "name": "Pago_Rechazado",
+                  "value": "Pago_Rechazado"
+                },
+                {
+                  "name": "Consulta_Estado",
+                  "value": "Consulta_Estado"
+                },
+                {
+                  "name": "Error_Sistema",
+                  "value": "Error_Sistema"
+                },
+                {
+                  "name": "Envio_WhatsApp",
+                  "value": "Envio_WhatsApp"
+                },
+                {
+                  "name": "Suscripción_Actualizada",
+                  "value": "Suscripción_Actualizada"
+                }
+              ],
+              "readOnly": false,
+              "removed": false
+            },
+            {
+              "id": "DNI_Socio",
+              "displayName": "DNI_Socio",
+              "required": false,
+              "defaultMatch": false,
+              "canBeUsedToMatch": true,
+              "display": true,
+              "type": "string",
+              "readOnly": false,
+              "removed": true
+            },
+            {
+              "id": "Origen",
+              "displayName": "Origen",
+              "required": false,
+              "defaultMatch": false,
+              "canBeUsedToMatch": true,
+              "display": true,
+              "type": "options",
+              "options": [
+                {
+                  "name": "n8n",
+                  "value": "n8n"
+                },
+                {
+                  "name": "WordPress",
+                  "value": "WordPress"
+                },
+                {
+                  "name": "MercadoPago",
+                  "value": "MercadoPago"
+                },
+                {
+                  "name": "Airtable",
+                  "value": "Airtable"
+                },
+                {
+                  "name": "Manual",
+                  "value": "Manual"
+                }
+              ],
+              "readOnly": false,
+              "removed": false
+            },
+            {
+              "id": "Detalles",
+              "displayName": "Detalles",
+              "required": false,
+              "defaultMatch": false,
+              "canBeUsedToMatch": true,
+              "display": true,
+              "type": "string",
+              "readOnly": false,
+              "removed": false
+            },
+            {
+              "id": "IP_Address",
+              "displayName": "IP_Address",
+              "required": false,
+              "defaultMatch": false,
+              "canBeUsedToMatch": true,
+              "display": true,
+              "type": "string",
+              "readOnly": false,
+              "removed": true
+            },
+            {
+              "id": "Usuario_Sistema",
+              "displayName": "Usuario_Sistema",
+              "required": false,
+              "defaultMatch": false,
+              "canBeUsedToMatch": true,
+              "display": true,
+              "type": "string",
+              "readOnly": false,
+              "removed": true
+            },
+            {
+              "id": "Estado_Resultado",
+              "displayName": "Estado_Resultado",
+              "required": false,
+              "defaultMatch": false,
+              "canBeUsedToMatch": true,
+              "display": true,
+              "type": "options",
+              "options": [
+                {
+                  "name": "Exitoso",
+                  "value": "Exitoso"
+                },
+                {
+                  "name": "Error",
+                  "value": "Error"
+                },
+                {
+                  "name": "Pendiente",
+                  "value": "Pendiente"
+                },
+                {
+                  "name": "Timeout",
+                  "value": "Timeout"
+                }
+              ],
+              "readOnly": false,
+              "removed": false
+            }
+          ],
+          "attemptToConvertTypes": false,
+          "convertFieldsToString": false
+        },
+        "options": {}
+      },
+      "type": "n8n-nodes-base.airtable",
+      "typeVersion": 2.1,
+      "position": [
+        448,
+        0
+      ],
+      "id": "6d67dda4-1b1b-4596-b9b9-489ecb5b02e8",
+      "name": "Create a record"
+    },
+    {
+      "parameters": {
+        "operation": "create",
+        "base": {
+          "__rl": true,
+          "value": "appIM8X2lshRuKnQb",
+          "mode": "list",
+          "cachedResultName": "Club de Futbol",
+          "cachedResultUrl": "https://airtable.com/appIM8X2lshRuKnQb"
+        },
+        "table": {
+          "__rl": true,
+          "value": "tbl5aFVyWrkKph8Gj",
+          "mode": "list",
+          "cachedResultName": "Logs_Sistema",
+          "cachedResultUrl": "https://airtable.com/appIM8X2lshRuKnQb/tbl5aFVyWrkKph8Gj"
+        },
+        "columns": {
+          "mappingMode": "defineBelow",
+          "value": {
+            "Timestamp": "={{ $now }}",
+            "Evento": "Suscripcion_Creada",
+            "Origen": "n8n",
+            "Detalles": "=Suscripción creada: {{ $('📊 Obtener Datos del Socio').item.json.Nombre_Completo }} - ",
+            "Estado_Resultado": "Exitoso"
+          },
+          "matchingColumns": [],
+          "schema": [
+            {
+              "id": "ID_Log",
+              "displayName": "ID_Log",
+              "required": false,
+              "defaultMatch": false,
+              "canBeUsedToMatch": true,
+              "display": true,
+              "type": "string",
+              "readOnly": false,
+              "removed": true
+            },
+            {
+              "id": "Timestamp",
+              "displayName": "Timestamp",
+              "required": false,
+              "defaultMatch": false,
+              "canBeUsedToMatch": true,
+              "display": true,
+              "type": "dateTime",
+              "readOnly": false,
+              "removed": false
+            },
+            {
+              "id": "Evento",
+              "displayName": "Evento",
+              "required": false,
+              "defaultMatch": false,
+              "canBeUsedToMatch": true,
+              "display": true,
+              "type": "options",
+              "options": [
+                {
+                  "name": "Suscripcion_Creada",
+                  "value": "Suscripcion_Creada"
+                },
+                {
+                  "name": "Suscripcion_Cancelada",
+                  "value": "Suscripcion_Cancelada"
+                },
+                {
+                  "name": "Pago_Procesado",
+                  "value": "Pago_Procesado"
+                },
+                {
+                  "name": "Pago_Rechazado",
+                  "value": "Pago_Rechazado"
+                },
+                {
+                  "name": "Consulta_Estado",
+                  "value": "Consulta_Estado"
+                },
+                {
+                  "name": "Error_Sistema",
+                  "value": "Error_Sistema"
+                },
+                {
+                  "name": "Envio_WhatsApp",
+                  "value": "Envio_WhatsApp"
+                },
+                {
+                  "name": "Suscripción_Actualizada",
+                  "value": "Suscripción_Actualizada"
+                }
+              ],
+              "readOnly": false,
+              "removed": false
+            },
+            {
+              "id": "DNI_Socio",
+              "displayName": "DNI_Socio",
+              "required": false,
+              "defaultMatch": false,
+              "canBeUsedToMatch": true,
+              "display": true,
+              "type": "string",
+              "readOnly": false,
+              "removed": true
+            },
+            {
+              "id": "Origen",
+              "displayName": "Origen",
+              "required": false,
+              "defaultMatch": false,
+              "canBeUsedToMatch": true,
+              "display": true,
+              "type": "options",
+              "options": [
+                {
+                  "name": "n8n",
+                  "value": "n8n"
+                },
+                {
+                  "name": "WordPress",
+                  "value": "WordPress"
+                },
+                {
+                  "name": "MercadoPago",
+                  "value": "MercadoPago"
+                },
+                {
+                  "name": "Airtable",
+                  "value": "Airtable"
+                },
+                {
+                  "name": "Manual",
+                  "value": "Manual"
+                }
+              ],
+              "readOnly": false,
+              "removed": false
+            },
+            {
+              "id": "Detalles",
+              "displayName": "Detalles",
+              "required": false,
+              "defaultMatch": false,
+              "canBeUsedToMatch": true,
+              "display": true,
+              "type": "string",
+              "readOnly": false,
+              "removed": false
+            },
+            {
+              "id": "IP_Address",
+              "displayName": "IP_Address",
+              "required": false,
+              "defaultMatch": false,
+              "canBeUsedToMatch": true,
+              "display": true,
+              "type": "string",
+              "readOnly": false,
+              "removed": true
+            },
+            {
+              "id": "Usuario_Sistema",
+              "displayName": "Usuario_Sistema",
+              "required": false,
+              "defaultMatch": false,
+              "canBeUsedToMatch": true,
+              "display": true,
+              "type": "string",
+              "readOnly": false,
+              "removed": true
+            },
+            {
+              "id": "Estado_Resultado",
+              "displayName": "Estado_Resultado",
+              "required": false,
+              "defaultMatch": false,
+              "canBeUsedToMatch": true,
+              "display": true,
+              "type": "options",
+              "options": [
+                {
+                  "name": "Exitoso",
+                  "value": "Exitoso"
+                },
+                {
+                  "name": "Error",
+                  "value": "Error"
+                },
+                {
+                  "name": "Pendiente",
+                  "value": "Pendiente"
+                },
+                {
+                  "name": "Timeout",
+                  "value": "Timeout"
+                }
+              ],
+              "readOnly": false,
+              "removed": false
+            }
+          ],
+          "attemptToConvertTypes": false,
+          "convertFieldsToString": false
+        },
+        "options": {}
+      },
+      "type": "n8n-nodes-base.airtable",
+      "typeVersion": 2.1,
+      "position": [
+        432,
+        192
+      ],
+      "id": "b18e4b56-056f-47bd-988c-eb1d4e32f64b",
+      "name": "Create a record1"
+    },
+    {
+      "parameters": {
+        "conditions": {
+          "options": {
+            "caseSensitive": true,
+            "leftValue": "",
+            "typeValidation": "strict",
+            "version": 2
+          },
+          "conditions": [
+            {
+              "id": "0029de93-1d4c-4e65-bd4c-9fef7e8a7e4e",
+              "leftValue": "={{ $('📊 Obtener Datos del Socio').item.json.Enlace_Suscripcion_MP }}",
+              "rightValue": "",
+              "operator": {
+                "type": "string",
+                "operation": "notEmpty",
+                "singleValue": true
+              }
+            }
+          ],
+          "combinator": "and"
+        },
+        "options": {}
+      },
+      "type": "n8n-nodes-base.if",
+      "typeVersion": 2.2,
+      "position": [
+        -208,
+        128
+      ],
+      "id": "877f4dc6-76e3-425b-ad76-66c9d7202dc8",
+      "name": "If"
+    },
+    {
+      "parameters": {
+        "method": "POST",
+        "url": "https://api.mercadopago.com/preapproval_plan",
+        "sendHeaders": true,
+        "headerParameters": {
+          "parameters": [
+            {
+              "name": "Content-Type",
+              "value": "application/json"
+            },
+            {
+              "name": "Authorization",
+              "value": "Bearer APP_USR-1575907424726657-111310-7a725029aa4094e75e3fe1db2b513a61-2677689551"
+            }
+          ]
+        },
+        "sendBody": true,
+        "specifyBody": "json",
+        "jsonBody": "={\n  \"reason\": \"{{ $json[\"Descripción\"] }}\",\n  \"auto_recurring\": {\n    \"frequency\": 1,\n    \"frequency_type\": \"months\",\n    \"transaction_amount\": {{ $json.Monto }},\n    \"currency_id\": \"ARS\"\n  },\n  \"back_url\": \"https://mercadopago.com.ar\",\n  \"external_reference\": \"{{ $('📊 Obtener Datos del Socio').item.json.DNI }}\"\n}\n",
+        "options": {
+          "response": {
+            "response": {
+              "neverError": true
+            }
+          }
+        }
+      },
+      "id": "185fd63e-c1b8-4b38-816e-a2726bd76fad",
+      "name": "🆕 Crear Plan MP1",
+      "type": "n8n-nodes-base.httpRequest",
+      "position": [
+        0,
+        592
+      ],
+      "typeVersion": 4
+    },
+    {
+      "parameters": {
+        "method": "PUT",
+        "url": "=https://api.mercadopago.com/preapproval_plan/{{ $('📊 Obtener Datos del Socio').item.json.ID_Suscripcion_MP }}",
+        "sendHeaders": true,
+        "headerParameters": {
+          "parameters": [
+            {
+              "name": "Content-Type",
+              "value": "application/json"
+            },
+            {
+              "name": "Authorization",
+              "value": "Bearer APP_USR-1575907424726657-111310-7a725029aa4094e75e3fe1db2b513a61-2677689551"
+            }
+          ]
+        },
+        "sendBody": true,
+        "specifyBody": "json",
+        "jsonBody": "={\n  \"reason\": \"{{ $json[\"Descripción\"] }}\",\n  \"auto_recurring\": {\n    \"frequency\": 1,\n    \"frequency_type\": \"months\",\n    \"transaction_amount\": {{ $json.Monto }},\n    \"billing_day_proportional\": true,\n    \"currency_id\": \"ARS\"\n  },\n  \"back_url\": \"https://club.com.ar/confirmacion\",\n  \"external_reference\": \"{{ $('📊 Obtener Datos del Socio').item.json.DNI }}\"\n}\n",
+        "options": {
+          "response": {
+            "response": {
+              "neverError": true
+            }
+          }
+        }
+      },
+      "id": "fc870964-1fd9-4689-bf34-c5dafc03cb2c",
+      "name": "🔄 Actualizar Plan MP1",
+      "type": "n8n-nodes-base.httpRequest",
+      "position": [
+        0,
+        400
+      ],
+      "typeVersion": 4
+    },
+    {
+      "parameters": {
+        "operation": "create",
+        "base": {
+          "__rl": true,
+          "value": "appIM8X2lshRuKnQb",
+          "mode": "list",
+          "cachedResultName": "Club de Futbol",
+          "cachedResultUrl": "https://airtable.com/appIM8X2lshRuKnQb"
+        },
+        "table": {
+          "__rl": true,
+          "value": "tbl5aFVyWrkKph8Gj",
+          "mode": "list",
+          "cachedResultName": "Logs_Sistema",
+          "cachedResultUrl": "https://airtable.com/appIM8X2lshRuKnQb/tbl5aFVyWrkKph8Gj"
+        },
+        "columns": {
+          "mappingMode": "defineBelow",
+          "value": {
+            "Timestamp": "={{ $now }}",
+            "Evento": "Suscripción_Actualizada",
+            "Origen": "n8n",
+            "Detalles": "=Actualziacion: {{ $json.fields.Plan }}",
+            "Estado_Resultado": "Exitoso"
+          },
+          "matchingColumns": [],
+          "schema": [
+            {
+              "id": "ID_Log",
+              "displayName": "ID_Log",
+              "required": false,
+              "defaultMatch": false,
+              "canBeUsedToMatch": true,
+              "display": true,
+              "type": "string",
+              "readOnly": false,
+              "removed": true
+            },
+            {
+              "id": "Timestamp",
+              "displayName": "Timestamp",
+              "required": false,
+              "defaultMatch": false,
+              "canBeUsedToMatch": true,
+              "display": true,
+              "type": "dateTime",
+              "readOnly": false,
+              "removed": false
+            },
+            {
+              "id": "Evento",
+              "displayName": "Evento",
+              "required": false,
+              "defaultMatch": false,
+              "canBeUsedToMatch": true,
+              "display": true,
+              "type": "options",
+              "options": [
+                {
+                  "name": "Suscripcion_Creada",
+                  "value": "Suscripcion_Creada"
+                },
+                {
+                  "name": "Suscripcion_Cancelada",
+                  "value": "Suscripcion_Cancelada"
+                },
+                {
+                  "name": "Pago_Procesado",
+                  "value": "Pago_Procesado"
+                },
+                {
+                  "name": "Pago_Rechazado",
+                  "value": "Pago_Rechazado"
+                },
+                {
+                  "name": "Consulta_Estado",
+                  "value": "Consulta_Estado"
+                },
+                {
+                  "name": "Error_Sistema",
+                  "value": "Error_Sistema"
+                },
+                {
+                  "name": "Envio_WhatsApp",
+                  "value": "Envio_WhatsApp"
+                },
+                {
+                  "name": "Suscripción_Actualizada",
+                  "value": "Suscripción_Actualizada"
+                }
+              ],
+              "readOnly": false,
+              "removed": false
+            },
+            {
+              "id": "DNI_Socio",
+              "displayName": "DNI_Socio",
+              "required": false,
+              "defaultMatch": false,
+              "canBeUsedToMatch": true,
+              "display": true,
+              "type": "string",
+              "readOnly": false,
+              "removed": true
+            },
+            {
+              "id": "Origen",
+              "displayName": "Origen",
+              "required": false,
+              "defaultMatch": false,
+              "canBeUsedToMatch": true,
+              "display": true,
+              "type": "options",
+              "options": [
+                {
+                  "name": "n8n",
+                  "value": "n8n"
+                },
+                {
+                  "name": "WordPress",
+                  "value": "WordPress"
+                },
+                {
+                  "name": "MercadoPago",
+                  "value": "MercadoPago"
+                },
+                {
+                  "name": "Airtable",
+                  "value": "Airtable"
+                },
+                {
+                  "name": "Manual",
+                  "value": "Manual"
+                }
+              ],
+              "readOnly": false,
+              "removed": false
+            },
+            {
+              "id": "Detalles",
+              "displayName": "Detalles",
+              "required": false,
+              "defaultMatch": false,
+              "canBeUsedToMatch": true,
+              "display": true,
+              "type": "string",
+              "readOnly": false,
+              "removed": false
+            },
+            {
+              "id": "IP_Address",
+              "displayName": "IP_Address",
+              "required": false,
+              "defaultMatch": false,
+              "canBeUsedToMatch": true,
+              "display": true,
+              "type": "string",
+              "readOnly": false,
+              "removed": true
+            },
+            {
+              "id": "Usuario_Sistema",
+              "displayName": "Usuario_Sistema",
+              "required": false,
+              "defaultMatch": false,
+              "canBeUsedToMatch": true,
+              "display": true,
+              "type": "string",
+              "readOnly": false,
+              "removed": true
+            },
+            {
+              "id": "Estado_Resultado",
+              "displayName": "Estado_Resultado",
+              "required": false,
+              "defaultMatch": false,
+              "canBeUsedToMatch": true,
+              "display": true,
+              "type": "options",
+              "options": [
+                {
+                  "name": "Exitoso",
+                  "value": "Exitoso"
+                },
+                {
+                  "name": "Error",
+                  "value": "Error"
+                },
+                {
+                  "name": "Pendiente",
+                  "value": "Pendiente"
+                },
+                {
+                  "name": "Timeout",
+                  "value": "Timeout"
+                }
+              ],
+              "readOnly": false,
+              "removed": false
+            }
+          ],
+          "attemptToConvertTypes": false,
+          "convertFieldsToString": false
+        },
+        "options": {}
+      },
+      "type": "n8n-nodes-base.airtable",
+      "typeVersion": 2.1,
+      "position": [
+        448,
+        400
+      ],
+      "id": "df2bbdc7-a8a9-4aba-941e-a61d6929f7cc",
+      "name": "Create a record2"
+    },
+    {
+      "parameters": {
+        "operation": "create",
+        "base": {
+          "__rl": true,
+          "value": "appIM8X2lshRuKnQb",
+          "mode": "list",
+          "cachedResultName": "Club de Futbol",
+          "cachedResultUrl": "https://airtable.com/appIM8X2lshRuKnQb"
+        },
+        "table": {
+          "__rl": true,
+          "value": "tbl5aFVyWrkKph8Gj",
+          "mode": "list",
+          "cachedResultName": "Logs_Sistema",
+          "cachedResultUrl": "https://airtable.com/appIM8X2lshRuKnQb/tbl5aFVyWrkKph8Gj"
+        },
+        "columns": {
+          "mappingMode": "defineBelow",
+          "value": {
+            "Timestamp": "={{ $now }}",
+            "Evento": "Suscripcion_Creada",
+            "Origen": "n8n",
+            "Detalles": "=PLan creado: {{ $json.Plan }}",
+            "Estado_Resultado": "Exitoso"
+          },
+          "matchingColumns": [],
+          "schema": [
+            {
+              "id": "ID_Log",
+              "displayName": "ID_Log",
+              "required": false,
+              "defaultMatch": false,
+              "canBeUsedToMatch": true,
+              "display": true,
+              "type": "string",
+              "readOnly": false,
+              "removed": true
+            },
+            {
+              "id": "Timestamp",
+              "displayName": "Timestamp",
+              "required": false,
+              "defaultMatch": false,
+              "canBeUsedToMatch": true,
+              "display": true,
+              "type": "dateTime",
+              "readOnly": false,
+              "removed": false
+            },
+            {
+              "id": "Evento",
+              "displayName": "Evento",
+              "required": false,
+              "defaultMatch": false,
+              "canBeUsedToMatch": true,
+              "display": true,
+              "type": "options",
+              "options": [
+                {
+                  "name": "Suscripcion_Creada",
+                  "value": "Suscripcion_Creada"
+                },
+                {
+                  "name": "Suscripcion_Cancelada",
+                  "value": "Suscripcion_Cancelada"
+                },
+                {
+                  "name": "Pago_Procesado",
+                  "value": "Pago_Procesado"
+                },
+                {
+                  "name": "Pago_Rechazado",
+                  "value": "Pago_Rechazado"
+                },
+                {
+                  "name": "Consulta_Estado",
+                  "value": "Consulta_Estado"
+                },
+                {
+                  "name": "Error_Sistema",
+                  "value": "Error_Sistema"
+                },
+                {
+                  "name": "Envio_WhatsApp",
+                  "value": "Envio_WhatsApp"
+                },
+                {
+                  "name": "Suscripción_Actualizada",
+                  "value": "Suscripción_Actualizada"
+                }
+              ],
+              "readOnly": false,
+              "removed": false
+            },
+            {
+              "id": "DNI_Socio",
+              "displayName": "DNI_Socio",
+              "required": false,
+              "defaultMatch": false,
+              "canBeUsedToMatch": true,
+              "display": true,
+              "type": "string",
+              "readOnly": false,
+              "removed": true
+            },
+            {
+              "id": "Origen",
+              "displayName": "Origen",
+              "required": false,
+              "defaultMatch": false,
+              "canBeUsedToMatch": true,
+              "display": true,
+              "type": "options",
+              "options": [
+                {
+                  "name": "n8n",
+                  "value": "n8n"
+                },
+                {
+                  "name": "WordPress",
+                  "value": "WordPress"
+                },
+                {
+                  "name": "MercadoPago",
+                  "value": "MercadoPago"
+                },
+                {
+                  "name": "Airtable",
+                  "value": "Airtable"
+                },
+                {
+                  "name": "Manual",
+                  "value": "Manual"
+                }
+              ],
+              "readOnly": false,
+              "removed": false
+            },
+            {
+              "id": "Detalles",
+              "displayName": "Detalles",
+              "required": false,
+              "defaultMatch": false,
+              "canBeUsedToMatch": true,
+              "display": true,
+              "type": "string",
+              "readOnly": false,
+              "removed": false
+            },
+            {
+              "id": "IP_Address",
+              "displayName": "IP_Address",
+              "required": false,
+              "defaultMatch": false,
+              "canBeUsedToMatch": true,
+              "display": true,
+              "type": "string",
+              "readOnly": false,
+              "removed": true
+            },
+            {
+              "id": "Usuario_Sistema",
+              "displayName": "Usuario_Sistema",
+              "required": false,
+              "defaultMatch": false,
+              "canBeUsedToMatch": true,
+              "display": true,
+              "type": "string",
+              "readOnly": false,
+              "removed": true
+            },
+            {
+              "id": "Estado_Resultado",
+              "displayName": "Estado_Resultado",
+              "required": false,
+              "defaultMatch": false,
+              "canBeUsedToMatch": true,
+              "display": true,
+              "type": "options",
+              "options": [
+                {
+                  "name": "Exitoso",
+                  "value": "Exitoso"
+                },
+                {
+                  "name": "Error",
+                  "value": "Error"
+                },
+                {
+                  "name": "Pendiente",
+                  "value": "Pendiente"
+                },
+                {
+                  "name": "Timeout",
+                  "value": "Timeout"
+                }
+              ],
+              "readOnly": false,
+              "removed": false
+            }
+          ],
+          "attemptToConvertTypes": false,
+          "convertFieldsToString": false
+        },
+        "options": {}
+      },
+      "type": "n8n-nodes-base.airtable",
+      "typeVersion": 2.1,
+      "position": [
+        432,
+        592
+      ],
+      "id": "7f777391-4bc6-4849-9516-91aebd8bbaf9",
+      "name": "Create a record3"
+    },
+    {
+      "parameters": {
+        "conditions": {
+          "options": {
+            "caseSensitive": true,
+            "leftValue": "",
+            "typeValidation": "strict",
+            "version": 2
+          },
+          "conditions": [
+            {
+              "id": "0029de93-1d4c-4e65-bd4c-9fef7e8a7e4e",
+              "leftValue": "={{ $('📊 Obtener Datos del Socio').item.json.Enlace_Suscripcion_MP }}",
+              "rightValue": "",
+              "operator": {
+                "type": "string",
+                "operation": "notEmpty",
+                "singleValue": true
+              }
+            }
+          ],
+          "combinator": "and"
+        },
+        "options": {}
+      },
+      "type": "n8n-nodes-base.if",
+      "typeVersion": 2.2,
+      "position": [
+        -208,
+        528
+      ],
+      "id": "4349049f-a45b-4ad6-8bca-f4e9071f6454",
+      "name": "If1"
+    },
+    {
+      "parameters": {
+        "method": "POST",
+        "url": "https://api.mercadopago.com/preapproval_plan",
+        "sendHeaders": true,
+        "headerParameters": {
+          "parameters": [
+            {
+              "name": "Content-Type",
+              "value": "application/json"
+            },
+            {
+              "name": "Authorization",
+              "value": "Bearer APP_USR-1575907424726657-111310-7a725029aa4094e75e3fe1db2b513a61-2677689551"
+            }
+          ]
+        },
+        "sendBody": true,
+        "specifyBody": "json",
+        "jsonBody": "={\n  \"reason\": \"{{ $json[\"Descripción\"] }}\",\n  \"auto_recurring\": {\n    \"frequency\": 1,\n    \"frequency_type\": \"months\",\n    \"transaction_amount\": {{ $json.Monto }},\n    \"currency_id\": \"ARS\"\n  },\n  \"back_url\": \"https://mercadopago.com.ar\",\n  \"external_reference\": \"{{ $('📊 Obtener Datos del Socio').item.json.DNI }}\"\n}\n",
+        "options": {
+          "response": {
+            "response": {
+              "neverError": true
+            }
+          }
+        }
+      },
+      "id": "bf1540e7-01de-475f-bc21-447838646cd0",
+      "name": "🆕 Crear Plan MP2",
+      "type": "n8n-nodes-base.httpRequest",
+      "position": [
+        -16,
+        976
+      ],
+      "typeVersion": 4
+    },
+    {
+      "parameters": {
+        "method": "PUT",
+        "url": "=https://api.mercadopago.com/preapproval_plan/{{ $('📊 Obtener Datos del Socio').item.json.ID_Suscripcion_MP }}",
+        "sendHeaders": true,
+        "headerParameters": {
+          "parameters": [
+            {
+              "name": "Content-Type",
+              "value": "application/json"
+            },
+            {
+              "name": "Authorization",
+              "value": "Bearer APP_USR-1575907424726657-111310-7a725029aa4094e75e3fe1db2b513a61-2677689551"
+            }
+          ]
+        },
+        "sendBody": true,
+        "specifyBody": "json",
+        "jsonBody": "={\n  \"reason\": \"{{ $json[\"Descripción\"] }}\",\n  \"auto_recurring\": {\n    \"frequency\": 1,\n    \"frequency_type\": \"months\",\n    \"transaction_amount\": {{ $json.Monto }},\n    \"billing_day_proportional\": true,\n    \"currency_id\": \"ARS\"\n  },\n  \"back_url\": \"https://club.com.ar/confirmacion\",\n  \"external_reference\": \"{{ $('📊 Obtener Datos del Socio').item.json.DNI }}\"\n}\n",
+        "options": {
+          "response": {
+            "response": {
+              "neverError": true
+            }
+          }
+        }
+      },
+      "id": "efd9c7cf-3c00-41b6-95c8-5100013cb58e",
+      "name": "🔄 Actualizar Plan MP2",
+      "type": "n8n-nodes-base.httpRequest",
+      "position": [
+        -16,
+        784
+      ],
+      "typeVersion": 4
+    },
+    {
+      "parameters": {
+        "operation": "create",
+        "base": {
+          "__rl": true,
+          "value": "appIM8X2lshRuKnQb",
+          "mode": "list",
+          "cachedResultName": "Club de Futbol",
+          "cachedResultUrl": "https://airtable.com/appIM8X2lshRuKnQb"
+        },
+        "table": {
+          "__rl": true,
+          "value": "tbl5aFVyWrkKph8Gj",
+          "mode": "list",
+          "cachedResultName": "Logs_Sistema",
+          "cachedResultUrl": "https://airtable.com/appIM8X2lshRuKnQb/tbl5aFVyWrkKph8Gj"
+        },
+        "columns": {
+          "mappingMode": "defineBelow",
+          "value": {
+            "Timestamp": "={{ $now }}",
+            "Evento": "Suscripción_Actualizada",
+            "Origen": "n8n",
+            "Detalles": "=Actualziacion: {{ $json.fields.Plan }}",
+            "Estado_Resultado": "Exitoso"
+          },
+          "matchingColumns": [],
+          "schema": [
+            {
+              "id": "ID_Log",
+              "displayName": "ID_Log",
+              "required": false,
+              "defaultMatch": false,
+              "canBeUsedToMatch": true,
+              "display": true,
+              "type": "string",
+              "readOnly": false,
+              "removed": true
+            },
+            {
+              "id": "Timestamp",
+              "displayName": "Timestamp",
+              "required": false,
+              "defaultMatch": false,
+              "canBeUsedToMatch": true,
+              "display": true,
+              "type": "dateTime",
+              "readOnly": false,
+              "removed": false
+            },
+            {
+              "id": "Evento",
+              "displayName": "Evento",
+              "required": false,
+              "defaultMatch": false,
+              "canBeUsedToMatch": true,
+              "display": true,
+              "type": "options",
+              "options": [
+                {
+                  "name": "Suscripcion_Creada",
+                  "value": "Suscripcion_Creada"
+                },
+                {
+                  "name": "Suscripcion_Cancelada",
+                  "value": "Suscripcion_Cancelada"
+                },
+                {
+                  "name": "Pago_Procesado",
+                  "value": "Pago_Procesado"
+                },
+                {
+                  "name": "Pago_Rechazado",
+                  "value": "Pago_Rechazado"
+                },
+                {
+                  "name": "Consulta_Estado",
+                  "value": "Consulta_Estado"
+                },
+                {
+                  "name": "Error_Sistema",
+                  "value": "Error_Sistema"
+                },
+                {
+                  "name": "Envio_WhatsApp",
+                  "value": "Envio_WhatsApp"
+                },
+                {
+                  "name": "Suscripción_Actualizada",
+                  "value": "Suscripción_Actualizada"
+                }
+              ],
+              "readOnly": false,
+              "removed": false
+            },
+            {
+              "id": "DNI_Socio",
+              "displayName": "DNI_Socio",
+              "required": false,
+              "defaultMatch": false,
+              "canBeUsedToMatch": true,
+              "display": true,
+              "type": "string",
+              "readOnly": false,
+              "removed": true
+            },
+            {
+              "id": "Origen",
+              "displayName": "Origen",
+              "required": false,
+              "defaultMatch": false,
+              "canBeUsedToMatch": true,
+              "display": true,
+              "type": "options",
+              "options": [
+                {
+                  "name": "n8n",
+                  "value": "n8n"
+                },
+                {
+                  "name": "WordPress",
+                  "value": "WordPress"
+                },
+                {
+                  "name": "MercadoPago",
+                  "value": "MercadoPago"
+                },
+                {
+                  "name": "Airtable",
+                  "value": "Airtable"
+                },
+                {
+                  "name": "Manual",
+                  "value": "Manual"
+                }
+              ],
+              "readOnly": false,
+              "removed": false
+            },
+            {
+              "id": "Detalles",
+              "displayName": "Detalles",
+              "required": false,
+              "defaultMatch": false,
+              "canBeUsedToMatch": true,
+              "display": true,
+              "type": "string",
+              "readOnly": false,
+              "removed": false
+            },
+            {
+              "id": "IP_Address",
+              "displayName": "IP_Address",
+              "required": false,
+              "defaultMatch": false,
+              "canBeUsedToMatch": true,
+              "display": true,
+              "type": "string",
+              "readOnly": false,
+              "removed": true
+            },
+            {
+              "id": "Usuario_Sistema",
+              "displayName": "Usuario_Sistema",
+              "required": false,
+              "defaultMatch": false,
+              "canBeUsedToMatch": true,
+              "display": true,
+              "type": "string",
+              "readOnly": false,
+              "removed": true
+            },
+            {
+              "id": "Estado_Resultado",
+              "displayName": "Estado_Resultado",
+              "required": false,
+              "defaultMatch": false,
+              "canBeUsedToMatch": true,
+              "display": true,
+              "type": "options",
+              "options": [
+                {
+                  "name": "Exitoso",
+                  "value": "Exitoso"
+                },
+                {
+                  "name": "Error",
+                  "value": "Error"
+                },
+                {
+                  "name": "Pendiente",
+                  "value": "Pendiente"
+                },
+                {
+                  "name": "Timeout",
+                  "value": "Timeout"
+                }
+              ],
+              "readOnly": false,
+              "removed": false
+            }
+          ],
+          "attemptToConvertTypes": false,
+          "convertFieldsToString": false
+        },
+        "options": {}
+      },
+      "type": "n8n-nodes-base.airtable",
+      "typeVersion": 2.1,
+      "position": [
+        432,
+        784
+      ],
+      "id": "b68b04c7-4ec8-40c4-9cf5-f8968417d01f",
+      "name": "Create a record4"
+    },
+    {
+      "parameters": {
+        "operation": "create",
+        "base": {
+          "__rl": true,
+          "value": "appIM8X2lshRuKnQb",
+          "mode": "list",
+          "cachedResultName": "Club de Futbol",
+          "cachedResultUrl": "https://airtable.com/appIM8X2lshRuKnQb"
+        },
+        "table": {
+          "__rl": true,
+          "value": "tbl5aFVyWrkKph8Gj",
+          "mode": "list",
+          "cachedResultName": "Logs_Sistema",
+          "cachedResultUrl": "https://airtable.com/appIM8X2lshRuKnQb/tbl5aFVyWrkKph8Gj"
+        },
+        "columns": {
+          "mappingMode": "defineBelow",
+          "value": {
+            "Timestamp": "={{ $now }}",
+            "Evento": "Suscripcion_Creada",
+            "Origen": "n8n",
+            "Detalles": "=PLan creado: {{ $json.Plan }}",
+            "Estado_Resultado": "Exitoso"
+          },
+          "matchingColumns": [],
+          "schema": [
+            {
+              "id": "ID_Log",
+              "displayName": "ID_Log",
+              "required": false,
+              "defaultMatch": false,
+              "canBeUsedToMatch": true,
+              "display": true,
+              "type": "string",
+              "readOnly": false,
+              "removed": true
+            },
+            {
+              "id": "Timestamp",
+              "displayName": "Timestamp",
+              "required": false,
+              "defaultMatch": false,
+              "canBeUsedToMatch": true,
+              "display": true,
+              "type": "dateTime",
+              "readOnly": false,
+              "removed": false
+            },
+            {
+              "id": "Evento",
+              "displayName": "Evento",
+              "required": false,
+              "defaultMatch": false,
+              "canBeUsedToMatch": true,
+              "display": true,
+              "type": "options",
+              "options": [
+                {
+                  "name": "Suscripcion_Creada",
+                  "value": "Suscripcion_Creada"
+                },
+                {
+                  "name": "Suscripcion_Cancelada",
+                  "value": "Suscripcion_Cancelada"
+                },
+                {
+                  "name": "Pago_Procesado",
+                  "value": "Pago_Procesado"
+                },
+                {
+                  "name": "Pago_Rechazado",
+                  "value": "Pago_Rechazado"
+                },
+                {
+                  "name": "Consulta_Estado",
+                  "value": "Consulta_Estado"
+                },
+                {
+                  "name": "Error_Sistema",
+                  "value": "Error_Sistema"
+                },
+                {
+                  "name": "Envio_WhatsApp",
+                  "value": "Envio_WhatsApp"
+                },
+                {
+                  "name": "Suscripción_Actualizada",
+                  "value": "Suscripción_Actualizada"
+                }
+              ],
+              "readOnly": false,
+              "removed": false
+            },
+            {
+              "id": "DNI_Socio",
+              "displayName": "DNI_Socio",
+              "required": false,
+              "defaultMatch": false,
+              "canBeUsedToMatch": true,
+              "display": true,
+              "type": "string",
+              "readOnly": false,
+              "removed": true
+            },
+            {
+              "id": "Origen",
+              "displayName": "Origen",
+              "required": false,
+              "defaultMatch": false,
+              "canBeUsedToMatch": true,
+              "display": true,
+              "type": "options",
+              "options": [
+                {
+                  "name": "n8n",
+                  "value": "n8n"
+                },
+                {
+                  "name": "WordPress",
+                  "value": "WordPress"
+                },
+                {
+                  "name": "MercadoPago",
+                  "value": "MercadoPago"
+                },
+                {
+                  "name": "Airtable",
+                  "value": "Airtable"
+                },
+                {
+                  "name": "Manual",
+                  "value": "Manual"
+                }
+              ],
+              "readOnly": false,
+              "removed": false
+            },
+            {
+              "id": "Detalles",
+              "displayName": "Detalles",
+              "required": false,
+              "defaultMatch": false,
+              "canBeUsedToMatch": true,
+              "display": true,
+              "type": "string",
+              "readOnly": false,
+              "removed": false
+            },
+            {
+              "id": "IP_Address",
+              "displayName": "IP_Address",
+              "required": false,
+              "defaultMatch": false,
+              "canBeUsedToMatch": true,
+              "display": true,
+              "type": "string",
+              "readOnly": false,
+              "removed": true
+            },
+            {
+              "id": "Usuario_Sistema",
+              "displayName": "Usuario_Sistema",
+              "required": false,
+              "defaultMatch": false,
+              "canBeUsedToMatch": true,
+              "display": true,
+              "type": "string",
+              "readOnly": false,
+              "removed": true
+            },
+            {
+              "id": "Estado_Resultado",
+              "displayName": "Estado_Resultado",
+              "required": false,
+              "defaultMatch": false,
+              "canBeUsedToMatch": true,
+              "display": true,
+              "type": "options",
+              "options": [
+                {
+                  "name": "Exitoso",
+                  "value": "Exitoso"
+                },
+                {
+                  "name": "Error",
+                  "value": "Error"
+                },
+                {
+                  "name": "Pendiente",
+                  "value": "Pendiente"
+                },
+                {
+                  "name": "Timeout",
+                  "value": "Timeout"
+                }
+              ],
+              "readOnly": false,
+              "removed": false
+            }
+          ],
+          "attemptToConvertTypes": false,
+          "convertFieldsToString": false
+        },
+        "options": {}
+      },
+      "type": "n8n-nodes-base.airtable",
+      "typeVersion": 2.1,
+      "position": [
+        416,
+        976
+      ],
+      "id": "7b9d399b-d203-41e5-a3cc-149cfa9d5028",
+      "name": "Create a record5"
+    },
+    {
+      "parameters": {
+        "conditions": {
+          "options": {
+            "caseSensitive": true,
+            "leftValue": "",
+            "typeValidation": "strict",
+            "version": 2
+          },
+          "conditions": [
+            {
+              "id": "0029de93-1d4c-4e65-bd4c-9fef7e8a7e4e",
+              "leftValue": "={{ $('📊 Obtener Datos del Socio').item.json.Enlace_Suscripcion_MP }}",
+              "rightValue": "",
+              "operator": {
+                "type": "string",
+                "operation": "notEmpty",
+                "singleValue": true
+              }
+            }
+          ],
+          "combinator": "and"
+        },
+        "options": {}
+      },
+      "type": "n8n-nodes-base.if",
+      "typeVersion": 2.2,
+      "position": [
+        -224,
+        912
+      ],
+      "id": "c4d9cd61-f17c-47d2-a676-f7bb4423ace9",
+      "name": "If2"
+    },
+    {
+      "parameters": {
+        "operation": "upsert",
+        "base": {
+          "__rl": true,
+          "value": "appIM8X2lshRuKnQb",
+          "mode": "list",
+          "cachedResultName": "Club de Futbol",
+          "cachedResultUrl": "https://airtable.com/appIM8X2lshRuKnQb"
+        },
+        "table": {
+          "__rl": true,
+          "value": "tbl0oONKSWiRuqX67",
+          "mode": "list",
+          "cachedResultName": "Socios",
+          "cachedResultUrl": "https://airtable.com/appIM8X2lshRuKnQb/tbl0oONKSWiRuqX67"
+        },
+        "columns": {
+          "mappingMode": "defineBelow",
+          "value": {
+            "id": "={{ $('📊 Obtener Datos del Socio').item.json.id }}",
+            "ID_Suscripcion_MP": "={{ $json.id }}",
+            "Enlace_Suscripcion_MP": "={{ $json.init_point }}",
+            "Estado_Suscripcion": "Pendiente"
+          },
+          "matchingColumns": [
+            "id"
+          ],
+          "schema": [
+            {
+              "id": "id",
+              "displayName": "id",
+              "required": false,
+              "defaultMatch": true,
+              "display": true,
+              "type": "string",
+              "readOnly": true
+            },
+            {
+              "id": "Nombre_Completo",
+              "displayName": "Nombre_Completo",
+              "required": false,
+              "defaultMatch": false,
+              "canBeUsedToMatch": true,
+              "display": true,
+              "type": "string",
+              "readOnly": false,
+              "removed": true
+            },
+            {
+              "id": "DNI",
+              "displayName": "DNI",
+              "required": false,
+              "defaultMatch": false,
+              "canBeUsedToMatch": true,
+              "display": true,
+              "type": "string",
+              "readOnly": false,
+              "removed": true
+            },
+            {
+              "id": "Fecha_Nacimiento",
+              "displayName": "Fecha_Nacimiento",
+              "required": false,
+              "defaultMatch": false,
+              "canBeUsedToMatch": true,
+              "display": true,
+              "type": "dateTime",
+              "readOnly": false,
+              "removed": true
+            },
+            {
+              "id": "WhatsApp",
+              "displayName": "WhatsApp",
+              "required": false,
+              "defaultMatch": false,
+              "canBeUsedToMatch": true,
+              "display": true,
+              "type": "string",
+              "readOnly": false,
+              "removed": true
+            },
+            {
+              "id": "Categoría",
+              "displayName": "Categoría",
+              "required": false,
+              "defaultMatch": false,
+              "canBeUsedToMatch": true,
+              "display": true,
+              "type": "array",
+              "readOnly": false,
+              "removed": true
+            },
+            {
+              "id": "Monto",
+              "displayName": "Monto",
+              "required": false,
+              "defaultMatch": false,
+              "canBeUsedToMatch": true,
+              "display": true,
+              "type": "string",
+              "readOnly": true,
+              "removed": true
+            },
+            {
+              "id": "Fecha_Inscripcion",
+              "displayName": "Fecha_Inscripcion",
+              "required": false,
+              "defaultMatch": false,
+              "canBeUsedToMatch": true,
+              "display": true,
+              "type": "dateTime",
+              "readOnly": false,
+              "removed": true
+            },
+            {
+              "id": "Estado_Socio",
+              "displayName": "Estado_Socio",
+              "required": false,
+              "defaultMatch": false,
+              "canBeUsedToMatch": true,
+              "display": true,
+              "type": "options",
+              "options": [
+                {
+                  "name": "Activo",
+                  "value": "Activo"
+                },
+                {
+                  "name": "Inactivo",
+                  "value": "Inactivo"
+                },
+                {
+                  "name": "Suspendido",
+                  "value": "Suspendido"
+                }
+              ],
+              "readOnly": false,
+              "removed": true
+            },
+            {
+              "id": "ID_Suscripcion_MP",
+              "displayName": "ID_Suscripcion_MP",
+              "required": false,
+              "defaultMatch": false,
+              "canBeUsedToMatch": true,
+              "display": true,
+              "type": "string",
+              "readOnly": false,
+              "removed": false
+            },
+            {
+              "id": "Enlace_Suscripcion_MP",
+              "displayName": "Enlace_Suscripcion_MP",
+              "required": false,
+              "defaultMatch": false,
+              "canBeUsedToMatch": true,
+              "display": true,
+              "type": "string",
+              "readOnly": false,
+              "removed": false
+            },
+            {
+              "id": "Estado_Suscripcion",
+              "displayName": "Estado_Suscripcion",
+              "required": false,
+              "defaultMatch": false,
+              "canBeUsedToMatch": true,
+              "display": true,
+              "type": "options",
+              "options": [
+                {
+                  "name": "Pendiente",
+                  "value": "Pendiente"
+                },
+                {
+                  "name": "Activa",
+                  "value": "Activa"
+                },
+                {
+                  "name": "Cancelada",
+                  "value": "Cancelada"
+                }
+              ],
+              "readOnly": false,
+              "removed": false
+            },
+            {
+              "id": "Crear Suscripción",
+              "displayName": "Crear Suscripción",
+              "required": false,
+              "defaultMatch": false,
+              "canBeUsedToMatch": true,
+              "display": true,
+              "type": "string",
+              "readOnly": true,
+              "removed": true
+            },
+            {
+              "id": "Cancelar Suscripción",
+              "displayName": "Cancelar Suscripción",
+              "required": false,
+              "defaultMatch": false,
+              "canBeUsedToMatch": true,
+              "display": true,
+              "type": "string",
+              "readOnly": true,
+              "removed": true
+            },
+            {
+              "id": "Fecha_Creacion_Suscripcion",
+              "displayName": "Fecha_Creacion_Suscripcion",
+              "required": false,
+              "defaultMatch": false,
+              "canBeUsedToMatch": true,
+              "display": true,
+              "type": "dateTime",
+              "readOnly": false,
+              "removed": true
+            },
+            {
+              "id": "Email_madre_Padre",
+              "displayName": "Email_madre_Padre",
+              "required": false,
+              "defaultMatch": false,
+              "canBeUsedToMatch": true,
+              "display": true,
+              "type": "string",
+              "readOnly": false,
+              "removed": true
+            },
+            {
+              "id": "Edad_Actual",
+              "displayName": "Edad_Actual",
+              "required": false,
+              "defaultMatch": false,
+              "canBeUsedToMatch": true,
+              "display": true,
+              "type": "string",
+              "readOnly": true,
+              "removed": true
+            },
+            {
+              "id": "Ultimo_Pago_Registrado",
+              "displayName": "Ultimo_Pago_Registrado",
+              "required": false,
+              "defaultMatch": false,
+              "canBeUsedToMatch": true,
+              "display": true,
+              "type": "dateTime",
+              "readOnly": false,
+              "removed": true
+            },
+            {
+              "id": "Meses_Adeudados",
+              "displayName": "Meses_Adeudados",
+              "required": false,
+              "defaultMatch": false,
+              "canBeUsedToMatch": true,
+              "display": true,
+              "type": "number",
+              "readOnly": false,
+              "removed": true
+            },
+            {
+              "id": "Total_Deuda",
+              "displayName": "Total_Deuda",
+              "required": false,
+              "defaultMatch": false,
+              "canBeUsedToMatch": true,
+              "display": true,
+              "type": "number",
+              "readOnly": false,
+              "removed": true
+            },
+            {
+              "id": "Notas",
+              "displayName": "Notas",
+              "required": false,
+              "defaultMatch": false,
+              "canBeUsedToMatch": true,
+              "display": true,
+              "type": "string",
+              "readOnly": false,
+              "removed": true
+            },
+            {
+              "id": "Pagos_Mensuales",
+              "displayName": "Pagos_Mensuales",
+              "required": false,
+              "defaultMatch": false,
+              "canBeUsedToMatch": true,
+              "display": true,
+              "type": "array",
+              "readOnly": false,
+              "removed": true
+            },
+            {
+              "id": "Padres",
+              "displayName": "Padres",
+              "required": false,
+              "defaultMatch": false,
+              "canBeUsedToMatch": true,
+              "display": true,
+              "type": "array",
+              "readOnly": false,
+              "removed": true
+            },
+            {
+              "id": "Accion_Suscripcion",
+              "displayName": "Accion_Suscripcion",
+              "required": false,
+              "defaultMatch": false,
+              "canBeUsedToMatch": true,
+              "display": true,
+              "type": "options",
+              "options": [
+                {
+                  "name": "Crear_Suscripcion",
+                  "value": "Crear_Suscripcion"
+                },
+                {
+                  "name": "Cancelar_Suscripcion",
+                  "value": "Cancelar_Suscripcion"
+                },
+                {
+                  "name": "Sin_Accion",
+                  "value": "Sin_Accion"
+                }
+              ],
+              "readOnly": false,
+              "removed": true
+            },
+            {
+              "id": "Procesado_Accion",
+              "displayName": "Procesado_Accion",
+              "required": false,
+              "defaultMatch": false,
+              "canBeUsedToMatch": true,
+              "display": true,
+              "type": "dateTime",
+              "readOnly": false,
+              "removed": true
+            },
+            {
+              "id": "Fecha_Ultimo_Problema_Pago",
+              "displayName": "Fecha_Ultimo_Problema_Pago",
+              "required": false,
+              "defaultMatch": false,
+              "canBeUsedToMatch": true,
+              "display": true,
+              "type": "dateTime",
+              "readOnly": false,
+              "removed": true
+            },
+            {
+              "id": "Intentos_Renovacion",
+              "displayName": "Intentos_Renovacion",
+              "required": false,
+              "defaultMatch": false,
+              "canBeUsedToMatch": true,
+              "display": true,
+              "type": "number",
+              "readOnly": false,
+              "removed": true
+            }
+          ],
+          "attemptToConvertTypes": false,
+          "convertFieldsToString": false
+        },
+        "options": {
+          "typecast": true
+        }
+      },
+      "type": "n8n-nodes-base.airtable",
+      "typeVersion": 2.1,
+      "position": [
+        240,
+        592
+      ],
+      "id": "4c614449-f35a-4590-a234-1b5e6257659c",
+      "name": "Create or update a record6"
+    },
+    {
+      "parameters": {
+        "operation": "upsert",
+        "base": {
+          "__rl": true,
+          "value": "appIM8X2lshRuKnQb",
+          "mode": "list",
+          "cachedResultName": "Club de Futbol",
+          "cachedResultUrl": "https://airtable.com/appIM8X2lshRuKnQb"
+        },
+        "table": {
+          "__rl": true,
+          "value": "tbl0oONKSWiRuqX67",
+          "mode": "list",
+          "cachedResultName": "Socios",
+          "cachedResultUrl": "https://airtable.com/appIM8X2lshRuKnQb/tbl0oONKSWiRuqX67"
+        },
+        "columns": {
+          "mappingMode": "defineBelow",
+          "value": {
+            "id": "={{ $('📊 Obtener Datos del Socio').item.json.id }}",
+            "ID_Suscripcion_MP": "={{ $json.id }}",
+            "Enlace_Suscripcion_MP": "={{ $json.init_point }}",
+            "Estado_Suscripcion": "Pendiente"
+          },
+          "matchingColumns": [
+            "id"
+          ],
+          "schema": [
+            {
+              "id": "id",
+              "displayName": "id",
+              "required": false,
+              "defaultMatch": true,
+              "display": true,
+              "type": "string",
+              "readOnly": true
+            },
+            {
+              "id": "Nombre_Completo",
+              "displayName": "Nombre_Completo",
+              "required": false,
+              "defaultMatch": false,
+              "canBeUsedToMatch": true,
+              "display": true,
+              "type": "string",
+              "readOnly": false,
+              "removed": true
+            },
+            {
+              "id": "DNI",
+              "displayName": "DNI",
+              "required": false,
+              "defaultMatch": false,
+              "canBeUsedToMatch": true,
+              "display": true,
+              "type": "string",
+              "readOnly": false,
+              "removed": true
+            },
+            {
+              "id": "Fecha_Nacimiento",
+              "displayName": "Fecha_Nacimiento",
+              "required": false,
+              "defaultMatch": false,
+              "canBeUsedToMatch": true,
+              "display": true,
+              "type": "dateTime",
+              "readOnly": false,
+              "removed": true
+            },
+            {
+              "id": "WhatsApp",
+              "displayName": "WhatsApp",
+              "required": false,
+              "defaultMatch": false,
+              "canBeUsedToMatch": true,
+              "display": true,
+              "type": "string",
+              "readOnly": false,
+              "removed": true
+            },
+            {
+              "id": "Categoría",
+              "displayName": "Categoría",
+              "required": false,
+              "defaultMatch": false,
+              "canBeUsedToMatch": true,
+              "display": true,
+              "type": "array",
+              "readOnly": false,
+              "removed": true
+            },
+            {
+              "id": "Monto",
+              "displayName": "Monto",
+              "required": false,
+              "defaultMatch": false,
+              "canBeUsedToMatch": true,
+              "display": true,
+              "type": "string",
+              "readOnly": true,
+              "removed": true
+            },
+            {
+              "id": "Fecha_Inscripcion",
+              "displayName": "Fecha_Inscripcion",
+              "required": false,
+              "defaultMatch": false,
+              "canBeUsedToMatch": true,
+              "display": true,
+              "type": "dateTime",
+              "readOnly": false,
+              "removed": true
+            },
+            {
+              "id": "Estado_Socio",
+              "displayName": "Estado_Socio",
+              "required": false,
+              "defaultMatch": false,
+              "canBeUsedToMatch": true,
+              "display": true,
+              "type": "options",
+              "options": [
+                {
+                  "name": "Activo",
+                  "value": "Activo"
+                },
+                {
+                  "name": "Inactivo",
+                  "value": "Inactivo"
+                },
+                {
+                  "name": "Suspendido",
+                  "value": "Suspendido"
+                }
+              ],
+              "readOnly": false,
+              "removed": true
+            },
+            {
+              "id": "ID_Suscripcion_MP",
+              "displayName": "ID_Suscripcion_MP",
+              "required": false,
+              "defaultMatch": false,
+              "canBeUsedToMatch": true,
+              "display": true,
+              "type": "string",
+              "readOnly": false,
+              "removed": false
+            },
+            {
+              "id": "Enlace_Suscripcion_MP",
+              "displayName": "Enlace_Suscripcion_MP",
+              "required": false,
+              "defaultMatch": false,
+              "canBeUsedToMatch": true,
+              "display": true,
+              "type": "string",
+              "readOnly": false,
+              "removed": false
+            },
+            {
+              "id": "Estado_Suscripcion",
+              "displayName": "Estado_Suscripcion",
+              "required": false,
+              "defaultMatch": false,
+              "canBeUsedToMatch": true,
+              "display": true,
+              "type": "options",
+              "options": [
+                {
+                  "name": "Pendiente",
+                  "value": "Pendiente"
+                },
+                {
+                  "name": "Activa",
+                  "value": "Activa"
+                },
+                {
+                  "name": "Cancelada",
+                  "value": "Cancelada"
+                }
+              ],
+              "readOnly": false,
+              "removed": false
+            },
+            {
+              "id": "Crear Suscripción",
+              "displayName": "Crear Suscripción",
+              "required": false,
+              "defaultMatch": false,
+              "canBeUsedToMatch": true,
+              "display": true,
+              "type": "string",
+              "readOnly": true,
+              "removed": true
+            },
+            {
+              "id": "Cancelar Suscripción",
+              "displayName": "Cancelar Suscripción",
+              "required": false,
+              "defaultMatch": false,
+              "canBeUsedToMatch": true,
+              "display": true,
+              "type": "string",
+              "readOnly": true,
+              "removed": true
+            },
+            {
+              "id": "Fecha_Creacion_Suscripcion",
+              "displayName": "Fecha_Creacion_Suscripcion",
+              "required": false,
+              "defaultMatch": false,
+              "canBeUsedToMatch": true,
+              "display": true,
+              "type": "dateTime",
+              "readOnly": false,
+              "removed": true
+            },
+            {
+              "id": "Email_madre_Padre",
+              "displayName": "Email_madre_Padre",
+              "required": false,
+              "defaultMatch": false,
+              "canBeUsedToMatch": true,
+              "display": true,
+              "type": "string",
+              "readOnly": false,
+              "removed": true
+            },
+            {
+              "id": "Edad_Actual",
+              "displayName": "Edad_Actual",
+              "required": false,
+              "defaultMatch": false,
+              "canBeUsedToMatch": true,
+              "display": true,
+              "type": "string",
+              "readOnly": true,
+              "removed": true
+            },
+            {
+              "id": "Ultimo_Pago_Registrado",
+              "displayName": "Ultimo_Pago_Registrado",
+              "required": false,
+              "defaultMatch": false,
+              "canBeUsedToMatch": true,
+              "display": true,
+              "type": "dateTime",
+              "readOnly": false,
+              "removed": true
+            },
+            {
+              "id": "Meses_Adeudados",
+              "displayName": "Meses_Adeudados",
+              "required": false,
+              "defaultMatch": false,
+              "canBeUsedToMatch": true,
+              "display": true,
+              "type": "number",
+              "readOnly": false,
+              "removed": true
+            },
+            {
+              "id": "Total_Deuda",
+              "displayName": "Total_Deuda",
+              "required": false,
+              "defaultMatch": false,
+              "canBeUsedToMatch": true,
+              "display": true,
+              "type": "number",
+              "readOnly": false,
+              "removed": true
+            },
+            {
+              "id": "Notas",
+              "displayName": "Notas",
+              "required": false,
+              "defaultMatch": false,
+              "canBeUsedToMatch": true,
+              "display": true,
+              "type": "string",
+              "readOnly": false,
+              "removed": true
+            },
+            {
+              "id": "Pagos_Mensuales",
+              "displayName": "Pagos_Mensuales",
+              "required": false,
+              "defaultMatch": false,
+              "canBeUsedToMatch": true,
+              "display": true,
+              "type": "array",
+              "readOnly": false,
+              "removed": true
+            },
+            {
+              "id": "Padres",
+              "displayName": "Padres",
+              "required": false,
+              "defaultMatch": false,
+              "canBeUsedToMatch": true,
+              "display": true,
+              "type": "array",
+              "readOnly": false,
+              "removed": true
+            },
+            {
+              "id": "Accion_Suscripcion",
+              "displayName": "Accion_Suscripcion",
+              "required": false,
+              "defaultMatch": false,
+              "canBeUsedToMatch": true,
+              "display": true,
+              "type": "options",
+              "options": [
+                {
+                  "name": "Crear_Suscripcion",
+                  "value": "Crear_Suscripcion"
+                },
+                {
+                  "name": "Cancelar_Suscripcion",
+                  "value": "Cancelar_Suscripcion"
+                },
+                {
+                  "name": "Sin_Accion",
+                  "value": "Sin_Accion"
+                }
+              ],
+              "readOnly": false,
+              "removed": true
+            },
+            {
+              "id": "Procesado_Accion",
+              "displayName": "Procesado_Accion",
+              "required": false,
+              "defaultMatch": false,
+              "canBeUsedToMatch": true,
+              "display": true,
+              "type": "dateTime",
+              "readOnly": false,
+              "removed": true
+            },
+            {
+              "id": "Fecha_Ultimo_Problema_Pago",
+              "displayName": "Fecha_Ultimo_Problema_Pago",
+              "required": false,
+              "defaultMatch": false,
+              "canBeUsedToMatch": true,
+              "display": true,
+              "type": "dateTime",
+              "readOnly": false,
+              "removed": true
+            },
+            {
+              "id": "Intentos_Renovacion",
+              "displayName": "Intentos_Renovacion",
+              "required": false,
+              "defaultMatch": false,
+              "canBeUsedToMatch": true,
+              "display": true,
+              "type": "number",
+              "readOnly": false,
+              "removed": true
+            }
+          ],
+          "attemptToConvertTypes": false,
+          "convertFieldsToString": false
+        },
+        "options": {
+          "typecast": true
+        }
+      },
+      "type": "n8n-nodes-base.airtable",
+      "typeVersion": 2.1,
+      "position": [
+        208,
+        1008
+      ],
+      "id": "69d31134-b0dc-4020-b6c0-ef839a4c248c",
+      "name": "Create or update a record7"
+    },
+    {
+      "parameters": {
+        "operation": "upsert",
+        "base": {
+          "__rl": true,
+          "value": "appIM8X2lshRuKnQb",
+          "mode": "list",
+          "cachedResultName": "Club de Futbol",
+          "cachedResultUrl": "https://airtable.com/appIM8X2lshRuKnQb"
+        },
+        "table": {
+          "__rl": true,
+          "value": "tbl0oONKSWiRuqX67",
+          "mode": "list",
+          "cachedResultName": "Socios",
+          "cachedResultUrl": "https://airtable.com/appIM8X2lshRuKnQb/tbl0oONKSWiRuqX67"
+        },
+        "columns": {
+          "mappingMode": "defineBelow",
+          "value": {
+            "id": "={{ $('📊 Obtener Datos del Socio').item.json.id }}",
+            "ID_Suscripcion_MP": "={{ $json.id }}",
+            "Enlace_Suscripcion_MP": "={{ $json.init_point }}",
+            "Estado_Suscripcion": "Activa",
+            "Fecha_última_Actualizacion": "={{ $json.last_modified }}"
+          },
+          "matchingColumns": [
+            "id"
+          ],
+          "schema": [
+            {
+              "id": "id",
+              "displayName": "id",
+              "required": false,
+              "defaultMatch": true,
+              "display": true,
+              "type": "string",
+              "readOnly": true,
+              "removed": false
+            },
+            {
+              "id": "Nombre_Completo",
+              "displayName": "Nombre_Completo",
+              "required": false,
+              "defaultMatch": false,
+              "canBeUsedToMatch": true,
+              "display": true,
+              "type": "string",
+              "readOnly": false,
+              "removed": true
+            },
+            {
+              "id": "DNI",
+              "displayName": "DNI",
+              "required": false,
+              "defaultMatch": false,
+              "canBeUsedToMatch": true,
+              "display": true,
+              "type": "string",
+              "readOnly": false,
+              "removed": true
+            },
+            {
+              "id": "Fecha_Nacimiento",
+              "displayName": "Fecha_Nacimiento",
+              "required": false,
+              "defaultMatch": false,
+              "canBeUsedToMatch": true,
+              "display": true,
+              "type": "dateTime",
+              "readOnly": false,
+              "removed": true
+            },
+            {
+              "id": "WhatsApp",
+              "displayName": "WhatsApp",
+              "required": false,
+              "defaultMatch": false,
+              "canBeUsedToMatch": true,
+              "display": true,
+              "type": "string",
+              "readOnly": false,
+              "removed": true
+            },
+            {
+              "id": "Categoría",
+              "displayName": "Categoría",
+              "required": false,
+              "defaultMatch": false,
+              "canBeUsedToMatch": true,
+              "display": true,
+              "type": "array",
+              "readOnly": false,
+              "removed": true
+            },
+            {
+              "id": "Categoria (from Categoría)",
+              "displayName": "Categoria (from Categoría)",
+              "required": false,
+              "defaultMatch": false,
+              "canBeUsedToMatch": true,
+              "display": true,
+              "type": "string",
+              "readOnly": true,
+              "removed": true
+            },
+            {
+              "id": "Monto",
+              "displayName": "Monto",
+              "required": false,
+              "defaultMatch": false,
+              "canBeUsedToMatch": true,
+              "display": true,
+              "type": "string",
+              "readOnly": true,
+              "removed": true
+            },
+            {
+              "id": "Fecha_Inscripcion",
+              "displayName": "Fecha_Inscripcion",
+              "required": false,
+              "defaultMatch": false,
+              "canBeUsedToMatch": true,
+              "display": true,
+              "type": "dateTime",
+              "readOnly": false,
+              "removed": true
+            },
+            {
+              "id": "Estado_Socio",
+              "displayName": "Estado_Socio",
+              "required": false,
+              "defaultMatch": false,
+              "canBeUsedToMatch": true,
+              "display": true,
+              "type": "options",
+              "options": [
+                {
+                  "name": "Activo",
+                  "value": "Activo"
+                },
+                {
+                  "name": "Inactivo",
+                  "value": "Inactivo"
+                },
+                {
+                  "name": "Suspendido",
+                  "value": "Suspendido"
+                }
+              ],
+              "readOnly": false,
+              "removed": true
+            },
+            {
+              "id": "ID_Suscripcion_MP",
+              "displayName": "ID_Suscripcion_MP",
+              "required": false,
+              "defaultMatch": false,
+              "canBeUsedToMatch": true,
+              "display": true,
+              "type": "string",
+              "readOnly": false,
+              "removed": false
+            },
+            {
+              "id": "Enlace_Suscripcion_MP",
+              "displayName": "Enlace_Suscripcion_MP",
+              "required": false,
+              "defaultMatch": false,
+              "canBeUsedToMatch": true,
+              "display": true,
+              "type": "string",
+              "readOnly": false,
+              "removed": false
+            },
+            {
+              "id": "Estado_Suscripcion",
+              "displayName": "Estado_Suscripcion",
+              "required": false,
+              "defaultMatch": false,
+              "canBeUsedToMatch": true,
+              "display": true,
+              "type": "options",
+              "options": [
+                {
+                  "name": "Pendiente",
+                  "value": "Pendiente"
+                },
+                {
+                  "name": "Activa",
+                  "value": "Activa"
+                },
+                {
+                  "name": "Cancelada",
+                  "value": "Cancelada"
+                },
+                {
+                  "name": "Pausada por error en pago",
+                  "value": "Pausada por error en pago"
+                }
+              ],
+              "readOnly": false,
+              "removed": false
+            },
+            {
+              "id": "Último Pago",
+              "displayName": "Último Pago",
+              "required": false,
+              "defaultMatch": false,
+              "canBeUsedToMatch": true,
+              "display": true,
+              "type": "options",
+              "options": [
+                {
+                  "name": "Aprobado",
+                  "value": "Aprobado"
+                },
+                {
+                  "name": "Rechazado",
+                  "value": "Rechazado"
+                }
+              ],
+              "readOnly": false,
+              "removed": true
+            },
+            {
+              "id": "Crear Suscripción",
+              "displayName": "Crear Suscripción",
+              "required": false,
+              "defaultMatch": false,
+              "canBeUsedToMatch": true,
+              "display": true,
+              "type": "string",
+              "readOnly": true,
+              "removed": true
+            },
+            {
+              "id": "Fecha_Primer_Pago",
+              "displayName": "Fecha_Primer_Pago",
+              "required": false,
+              "defaultMatch": false,
+              "canBeUsedToMatch": true,
+              "display": true,
+              "type": "dateTime",
+              "readOnly": false,
+              "removed": true
+            },
+            {
+              "id": "Actualizar monto/categoria",
+              "displayName": "Actualizar monto/categoria",
+              "required": false,
+              "defaultMatch": false,
+              "canBeUsedToMatch": true,
+              "display": true,
+              "type": "string",
+              "readOnly": true,
+              "removed": true
+            },
+            {
+              "id": "Fecha_última_Actualizacion",
+              "displayName": "Fecha_última_Actualizacion",
+              "required": false,
+              "defaultMatch": false,
+              "canBeUsedToMatch": true,
+              "display": true,
+              "type": "dateTime",
+              "readOnly": false,
+              "removed": false
+            },
+            {
+              "id": "Cancelar Suscripción",
+              "displayName": "Cancelar Suscripción",
+              "required": false,
+              "defaultMatch": false,
+              "canBeUsedToMatch": true,
+              "display": true,
+              "type": "string",
+              "readOnly": true,
+              "removed": true
+            },
+            {
+              "id": "Email_madre_Padre",
+              "displayName": "Email_madre_Padre",
+              "required": false,
+              "defaultMatch": false,
+              "canBeUsedToMatch": true,
+              "display": true,
+              "type": "string",
+              "readOnly": false,
+              "removed": true
+            },
+            {
+              "id": "Edad_Actual",
+              "displayName": "Edad_Actual",
+              "required": false,
+              "defaultMatch": false,
+              "canBeUsedToMatch": true,
+              "display": true,
+              "type": "string",
+              "readOnly": true,
+              "removed": true
+            },
+            {
+              "id": "Ultimo_Pago_Registrado",
+              "displayName": "Ultimo_Pago_Registrado",
+              "required": false,
+              "defaultMatch": false,
+              "canBeUsedToMatch": true,
+              "display": true,
+              "type": "dateTime",
+              "readOnly": false,
+              "removed": true
+            },
+            {
+              "id": "Meses_Adeudados",
+              "displayName": "Meses_Adeudados",
+              "required": false,
+              "defaultMatch": false,
+              "canBeUsedToMatch": true,
+              "display": true,
+              "type": "number",
+              "readOnly": false,
+              "removed": true
+            },
+            {
+              "id": "Total_Deuda",
+              "displayName": "Total_Deuda",
+              "required": false,
+              "defaultMatch": false,
+              "canBeUsedToMatch": true,
+              "display": true,
+              "type": "number",
+              "readOnly": false,
+              "removed": true
+            },
+            {
+              "id": "Notas",
+              "displayName": "Notas",
+              "required": false,
+              "defaultMatch": false,
+              "canBeUsedToMatch": true,
+              "display": true,
+              "type": "string",
+              "readOnly": false,
+              "removed": true
+            },
+            {
+              "id": "Pagos_Mensuales",
+              "displayName": "Pagos_Mensuales",
+              "required": false,
+              "defaultMatch": false,
+              "canBeUsedToMatch": true,
+              "display": true,
+              "type": "array",
+              "readOnly": false,
+              "removed": true
+            },
+            {
+              "id": "Padres",
+              "displayName": "Padres",
+              "required": false,
+              "defaultMatch": false,
+              "canBeUsedToMatch": true,
+              "display": true,
+              "type": "array",
+              "readOnly": false,
+              "removed": true
+            },
+            {
+              "id": "Procesado_Accion",
+              "displayName": "Procesado_Accion",
+              "required": false,
+              "defaultMatch": false,
+              "canBeUsedToMatch": true,
+              "display": true,
+              "type": "dateTime",
+              "readOnly": false,
+              "removed": true
+            },
+            {
+              "id": "Fecha_Ultimo_Problema_Pago",
+              "displayName": "Fecha_Ultimo_Problema_Pago",
+              "required": false,
+              "defaultMatch": false,
+              "canBeUsedToMatch": true,
+              "display": true,
+              "type": "dateTime",
+              "readOnly": false,
+              "removed": true
+            },
+            {
+              "id": "Intentos_Renovacion",
+              "displayName": "Intentos_Renovacion",
+              "required": false,
+              "defaultMatch": false,
+              "canBeUsedToMatch": true,
+              "display": true,
+              "type": "number",
+              "readOnly": false,
+              "removed": true
+            }
+          ],
+          "attemptToConvertTypes": false,
+          "convertFieldsToString": false
+        },
+        "options": {
+          "typecast": true
+        }
+      },
+      "type": "n8n-nodes-base.airtable",
+      "typeVersion": 2.1,
+      "position": [
+        240,
+        400
+      ],
+      "id": "4bea2718-87a0-4a0f-89e8-741b568a6b6d",
+      "name": "Create or update a record2"
+    },
+    {
+      "parameters": {
+        "operation": "upsert",
+        "base": {
+          "__rl": true,
+          "value": "appIM8X2lshRuKnQb",
+          "mode": "list",
+          "cachedResultName": "Club de Futbol",
+          "cachedResultUrl": "https://airtable.com/appIM8X2lshRuKnQb"
+        },
+        "table": {
+          "__rl": true,
+          "value": "tbl0oONKSWiRuqX67",
+          "mode": "list",
+          "cachedResultName": "Socios",
+          "cachedResultUrl": "https://airtable.com/appIM8X2lshRuKnQb/tbl0oONKSWiRuqX67"
+        },
+        "columns": {
+          "mappingMode": "defineBelow",
+          "value": {
+            "id": "={{ $('📊 Obtener Datos del Socio').item.json.id }}",
+            "ID_Suscripcion_MP": "={{ $json.id }}",
+            "Enlace_Suscripcion_MP": "={{ $json.init_point }}",
+            "Estado_Suscripcion": "Activa",
+            "Fecha_última_Actualizacion": "={{ $json.last_modified }}"
+          },
+          "matchingColumns": [
+            "id"
+          ],
+          "schema": [
+            {
+              "id": "id",
+              "displayName": "id",
+              "required": false,
+              "defaultMatch": true,
+              "display": true,
+              "type": "string",
+              "readOnly": true,
+              "removed": false
+            },
+            {
+              "id": "Nombre_Completo",
+              "displayName": "Nombre_Completo",
+              "required": false,
+              "defaultMatch": false,
+              "canBeUsedToMatch": true,
+              "display": true,
+              "type": "string",
+              "readOnly": false,
+              "removed": true
+            },
+            {
+              "id": "DNI",
+              "displayName": "DNI",
+              "required": false,
+              "defaultMatch": false,
+              "canBeUsedToMatch": true,
+              "display": true,
+              "type": "string",
+              "readOnly": false,
+              "removed": true
+            },
+            {
+              "id": "Fecha_Nacimiento",
+              "displayName": "Fecha_Nacimiento",
+              "required": false,
+              "defaultMatch": false,
+              "canBeUsedToMatch": true,
+              "display": true,
+              "type": "dateTime",
+              "readOnly": false,
+              "removed": true
+            },
+            {
+              "id": "WhatsApp",
+              "displayName": "WhatsApp",
+              "required": false,
+              "defaultMatch": false,
+              "canBeUsedToMatch": true,
+              "display": true,
+              "type": "string",
+              "readOnly": false,
+              "removed": true
+            },
+            {
+              "id": "Categoría",
+              "displayName": "Categoría",
+              "required": false,
+              "defaultMatch": false,
+              "canBeUsedToMatch": true,
+              "display": true,
+              "type": "array",
+              "readOnly": false,
+              "removed": true
+            },
+            {
+              "id": "Categoria (from Categoría)",
+              "displayName": "Categoria (from Categoría)",
+              "required": false,
+              "defaultMatch": false,
+              "canBeUsedToMatch": true,
+              "display": true,
+              "type": "string",
+              "readOnly": true,
+              "removed": true
+            },
+            {
+              "id": "Monto",
+              "displayName": "Monto",
+              "required": false,
+              "defaultMatch": false,
+              "canBeUsedToMatch": true,
+              "display": true,
+              "type": "string",
+              "readOnly": true,
+              "removed": true
+            },
+            {
+              "id": "Fecha_Inscripcion",
+              "displayName": "Fecha_Inscripcion",
+              "required": false,
+              "defaultMatch": false,
+              "canBeUsedToMatch": true,
+              "display": true,
+              "type": "dateTime",
+              "readOnly": false,
+              "removed": true
+            },
+            {
+              "id": "Estado_Socio",
+              "displayName": "Estado_Socio",
+              "required": false,
+              "defaultMatch": false,
+              "canBeUsedToMatch": true,
+              "display": true,
+              "type": "options",
+              "options": [
+                {
+                  "name": "Activo",
+                  "value": "Activo"
+                },
+                {
+                  "name": "Inactivo",
+                  "value": "Inactivo"
+                },
+                {
+                  "name": "Suspendido",
+                  "value": "Suspendido"
+                }
+              ],
+              "readOnly": false,
+              "removed": true
+            },
+            {
+              "id": "ID_Suscripcion_MP",
+              "displayName": "ID_Suscripcion_MP",
+              "required": false,
+              "defaultMatch": false,
+              "canBeUsedToMatch": true,
+              "display": true,
+              "type": "string",
+              "readOnly": false,
+              "removed": false
+            },
+            {
+              "id": "Enlace_Suscripcion_MP",
+              "displayName": "Enlace_Suscripcion_MP",
+              "required": false,
+              "defaultMatch": false,
+              "canBeUsedToMatch": true,
+              "display": true,
+              "type": "string",
+              "readOnly": false,
+              "removed": false
+            },
+            {
+              "id": "Estado_Suscripcion",
+              "displayName": "Estado_Suscripcion",
+              "required": false,
+              "defaultMatch": false,
+              "canBeUsedToMatch": true,
+              "display": true,
+              "type": "options",
+              "options": [
+                {
+                  "name": "Pendiente",
+                  "value": "Pendiente"
+                },
+                {
+                  "name": "Activa",
+                  "value": "Activa"
+                },
+                {
+                  "name": "Cancelada",
+                  "value": "Cancelada"
+                },
+                {
+                  "name": "Pausada por error en pago",
+                  "value": "Pausada por error en pago"
+                }
+              ],
+              "readOnly": false,
+              "removed": false
+            },
+            {
+              "id": "Último Pago",
+              "displayName": "Último Pago",
+              "required": false,
+              "defaultMatch": false,
+              "canBeUsedToMatch": true,
+              "display": true,
+              "type": "options",
+              "options": [
+                {
+                  "name": "Aprobado",
+                  "value": "Aprobado"
+                },
+                {
+                  "name": "Rechazado",
+                  "value": "Rechazado"
+                }
+              ],
+              "readOnly": false,
+              "removed": true
+            },
+            {
+              "id": "Crear Suscripción",
+              "displayName": "Crear Suscripción",
+              "required": false,
+              "defaultMatch": false,
+              "canBeUsedToMatch": true,
+              "display": true,
+              "type": "string",
+              "readOnly": true,
+              "removed": true
+            },
+            {
+              "id": "Fecha_Primer_Pago",
+              "displayName": "Fecha_Primer_Pago",
+              "required": false,
+              "defaultMatch": false,
+              "canBeUsedToMatch": true,
+              "display": true,
+              "type": "dateTime",
+              "readOnly": false,
+              "removed": true
+            },
+            {
+              "id": "Actualizar monto/categoria",
+              "displayName": "Actualizar monto/categoria",
+              "required": false,
+              "defaultMatch": false,
+              "canBeUsedToMatch": true,
+              "display": true,
+              "type": "string",
+              "readOnly": true,
+              "removed": true
+            },
+            {
+              "id": "Fecha_última_Actualizacion",
+              "displayName": "Fecha_última_Actualizacion",
+              "required": false,
+              "defaultMatch": false,
+              "canBeUsedToMatch": true,
+              "display": true,
+              "type": "dateTime",
+              "readOnly": false,
+              "removed": false
+            },
+            {
+              "id": "Cancelar Suscripción",
+              "displayName": "Cancelar Suscripción",
+              "required": false,
+              "defaultMatch": false,
+              "canBeUsedToMatch": true,
+              "display": true,
+              "type": "string",
+              "readOnly": true,
+              "removed": true
+            },
+            {
+              "id": "Email_madre_Padre",
+              "displayName": "Email_madre_Padre",
+              "required": false,
+              "defaultMatch": false,
+              "canBeUsedToMatch": true,
+              "display": true,
+              "type": "string",
+              "readOnly": false,
+              "removed": true
+            },
+            {
+              "id": "Edad_Actual",
+              "displayName": "Edad_Actual",
+              "required": false,
+              "defaultMatch": false,
+              "canBeUsedToMatch": true,
+              "display": true,
+              "type": "string",
+              "readOnly": true,
+              "removed": true
+            },
+            {
+              "id": "Ultimo_Pago_Registrado",
+              "displayName": "Ultimo_Pago_Registrado",
+              "required": false,
+              "defaultMatch": false,
+              "canBeUsedToMatch": true,
+              "display": true,
+              "type": "dateTime",
+              "readOnly": false,
+              "removed": true
+            },
+            {
+              "id": "Meses_Adeudados",
+              "displayName": "Meses_Adeudados",
+              "required": false,
+              "defaultMatch": false,
+              "canBeUsedToMatch": true,
+              "display": true,
+              "type": "number",
+              "readOnly": false,
+              "removed": true
+            },
+            {
+              "id": "Total_Deuda",
+              "displayName": "Total_Deuda",
+              "required": false,
+              "defaultMatch": false,
+              "canBeUsedToMatch": true,
+              "display": true,
+              "type": "number",
+              "readOnly": false,
+              "removed": true
+            },
+            {
+              "id": "Notas",
+              "displayName": "Notas",
+              "required": false,
+              "defaultMatch": false,
+              "canBeUsedToMatch": true,
+              "display": true,
+              "type": "string",
+              "readOnly": false,
+              "removed": true
+            },
+            {
+              "id": "Pagos_Mensuales",
+              "displayName": "Pagos_Mensuales",
+              "required": false,
+              "defaultMatch": false,
+              "canBeUsedToMatch": true,
+              "display": true,
+              "type": "array",
+              "readOnly": false,
+              "removed": true
+            },
+            {
+              "id": "Padres",
+              "displayName": "Padres",
+              "required": false,
+              "defaultMatch": false,
+              "canBeUsedToMatch": true,
+              "display": true,
+              "type": "array",
+              "readOnly": false,
+              "removed": true
+            },
+            {
+              "id": "Procesado_Accion",
+              "displayName": "Procesado_Accion",
+              "required": false,
+              "defaultMatch": false,
+              "canBeUsedToMatch": true,
+              "display": true,
+              "type": "dateTime",
+              "readOnly": false,
+              "removed": true
+            },
+            {
+              "id": "Fecha_Ultimo_Problema_Pago",
+              "displayName": "Fecha_Ultimo_Problema_Pago",
+              "required": false,
+              "defaultMatch": false,
+              "canBeUsedToMatch": true,
+              "display": true,
+              "type": "dateTime",
+              "readOnly": false,
+              "removed": true
+            },
+            {
+              "id": "Intentos_Renovacion",
+              "displayName": "Intentos_Renovacion",
+              "required": false,
+              "defaultMatch": false,
+              "canBeUsedToMatch": true,
+              "display": true,
+              "type": "number",
+              "readOnly": false,
+              "removed": true
+            }
+          ],
+          "attemptToConvertTypes": false,
+          "convertFieldsToString": false
+        },
+        "options": {
+          "typecast": true
+        }
+      },
+      "type": "n8n-nodes-base.airtable",
+      "typeVersion": 2.1,
+      "position": [
+        224,
+        784
+      ],
+      "id": "a8ad38e7-a88f-4a5b-9621-9f467b6aba20",
+      "name": "Create or update a record3"
+    },
+    {
+      "parameters": {
+        "method": "POST",
+        "url": "https://api.mercadopago.com/preapproval_plan",
+        "sendHeaders": true,
+        "headerParameters": {
+          "parameters": [
+            {
+              "name": "Content-Type",
+              "value": "application/json"
+            },
+            {
+              "name": "Authorization",
+              "value": "Bearer APP_USR-1575907424726657-111310-7a725029aa4094e75e3fe1db2b513a61-2677689551"
+            }
+          ]
+        },
+        "sendBody": true,
+        "specifyBody": "json",
+        "jsonBody": "={\n  \"reason\": \"{{ $json[\"Descripción\"] }}\",\n  \"auto_recurring\": {\n    \"frequency\": 1,\n    \"frequency_type\": \"months\",\n    \"transaction_amount\": {{ $json.Monto }},\n    \"currency_id\": \"ARS\"\n  },\n  \"back_url\": \"https://mercadopago.com.ar\",\n  \"external_reference\": \"{{ $('📊 Obtener Datos del Socio').item.json.DNI }}\"\n}\n",
+        "options": {
+          "response": {
+            "response": {
+              "neverError": true
+            }
+          }
+        }
+      },
+      "id": "d06dd642-deb5-477d-8156-969e48572990",
+      "name": "🆕 Crear Plan MP3",
+      "type": "n8n-nodes-base.httpRequest",
+      "position": [
+        -640,
+        1920
+      ],
+      "typeVersion": 4
+    },
+    {
+      "parameters": {
+        "method": "PUT",
+        "url": "=https://api.mercadopago.com/preapproval_plan/{{ $('📊 Obtener Datos del Socio').item.json.ID_Suscripcion_MP }}",
+        "sendHeaders": true,
+        "headerParameters": {
+          "parameters": [
+            {
+              "name": "Content-Type",
+              "value": "application/json"
+            },
+            {
+              "name": "Authorization",
+              "value": "Bearer APP_USR-1575907424726657-111310-7a725029aa4094e75e3fe1db2b513a61-2677689551"
+            }
+          ]
+        },
+        "sendBody": true,
+        "specifyBody": "json",
+        "jsonBody": "={\n  \"reason\": \"Club - {{ $json['Categoria (from Categoría)'][0] }}\",\n  \"auto_recurring\": {\n    \"frequency\": 1,\n    \"frequency_type\": \"months\",\n    \"transaction_amount\": {{ $json.Monto }},\n    \"billing_day_proportional\": true,\n    \"currency_id\": \"ARS\"\n  },\n  \"back_url\": \"https://club.com.ar/confirmacion\",\n  \"external_reference\": \"{{ $('📊 Obtener Datos del Socio').item.json.DNI }}\"\n}\n",
+        "options": {
+          "response": {
+            "response": {
+              "neverError": true
+            }
+          }
+        }
+      },
+      "id": "c821fd24-b8ae-41ab-ab53-8e843a17ad62",
+      "name": "🔄 Actualizar Plan MP3",
+      "type": "n8n-nodes-base.httpRequest",
+      "position": [
+        -640,
+        1728
+      ],
+      "typeVersion": 4
+    },
+    {
+      "parameters": {
+        "operation": "create",
+        "base": {
+          "__rl": true,
+          "value": "appIM8X2lshRuKnQb",
+          "mode": "list",
+          "cachedResultName": "Club de Futbol",
+          "cachedResultUrl": "https://airtable.com/appIM8X2lshRuKnQb"
+        },
+        "table": {
+          "__rl": true,
+          "value": "tbl5aFVyWrkKph8Gj",
+          "mode": "list",
+          "cachedResultName": "Logs_Sistema",
+          "cachedResultUrl": "https://airtable.com/appIM8X2lshRuKnQb/tbl5aFVyWrkKph8Gj"
+        },
+        "columns": {
+          "mappingMode": "defineBelow",
+          "value": {
+            "Timestamp": "={{ $now }}",
+            "Evento": "Suscripción_Actualizada",
+            "Origen": "n8n",
+            "Detalles": "=Actualziacion: {{ $json.fields.Plan }}",
+            "Estado_Resultado": "Exitoso"
+          },
+          "matchingColumns": [],
+          "schema": [
+            {
+              "id": "ID_Log",
+              "displayName": "ID_Log",
+              "required": false,
+              "defaultMatch": false,
+              "canBeUsedToMatch": true,
+              "display": true,
+              "type": "string",
+              "readOnly": false,
+              "removed": true
+            },
+            {
+              "id": "Timestamp",
+              "displayName": "Timestamp",
+              "required": false,
+              "defaultMatch": false,
+              "canBeUsedToMatch": true,
+              "display": true,
+              "type": "dateTime",
+              "readOnly": false,
+              "removed": false
+            },
+            {
+              "id": "Evento",
+              "displayName": "Evento",
+              "required": false,
+              "defaultMatch": false,
+              "canBeUsedToMatch": true,
+              "display": true,
+              "type": "options",
+              "options": [
+                {
+                  "name": "Suscripcion_Creada",
+                  "value": "Suscripcion_Creada"
+                },
+                {
+                  "name": "Suscripcion_Cancelada",
+                  "value": "Suscripcion_Cancelada"
+                },
+                {
+                  "name": "Pago_Procesado",
+                  "value": "Pago_Procesado"
+                },
+                {
+                  "name": "Pago_Rechazado",
+                  "value": "Pago_Rechazado"
+                },
+                {
+                  "name": "Consulta_Estado",
+                  "value": "Consulta_Estado"
+                },
+                {
+                  "name": "Error_Sistema",
+                  "value": "Error_Sistema"
+                },
+                {
+                  "name": "Envio_WhatsApp",
+                  "value": "Envio_WhatsApp"
+                },
+                {
+                  "name": "Suscripción_Actualizada",
+                  "value": "Suscripción_Actualizada"
+                }
+              ],
+              "readOnly": false,
+              "removed": false
+            },
+            {
+              "id": "DNI_Socio",
+              "displayName": "DNI_Socio",
+              "required": false,
+              "defaultMatch": false,
+              "canBeUsedToMatch": true,
+              "display": true,
+              "type": "string",
+              "readOnly": false,
+              "removed": true
+            },
+            {
+              "id": "Origen",
+              "displayName": "Origen",
+              "required": false,
+              "defaultMatch": false,
+              "canBeUsedToMatch": true,
+              "display": true,
+              "type": "options",
+              "options": [
+                {
+                  "name": "n8n",
+                  "value": "n8n"
+                },
+                {
+                  "name": "WordPress",
+                  "value": "WordPress"
+                },
+                {
+                  "name": "MercadoPago",
+                  "value": "MercadoPago"
+                },
+                {
+                  "name": "Airtable",
+                  "value": "Airtable"
+                },
+                {
+                  "name": "Manual",
+                  "value": "Manual"
+                }
+              ],
+              "readOnly": false,
+              "removed": false
+            },
+            {
+              "id": "Detalles",
+              "displayName": "Detalles",
+              "required": false,
+              "defaultMatch": false,
+              "canBeUsedToMatch": true,
+              "display": true,
+              "type": "string",
+              "readOnly": false,
+              "removed": false
+            },
+            {
+              "id": "IP_Address",
+              "displayName": "IP_Address",
+              "required": false,
+              "defaultMatch": false,
+              "canBeUsedToMatch": true,
+              "display": true,
+              "type": "string",
+              "readOnly": false,
+              "removed": true
+            },
+            {
+              "id": "Usuario_Sistema",
+              "displayName": "Usuario_Sistema",
+              "required": false,
+              "defaultMatch": false,
+              "canBeUsedToMatch": true,
+              "display": true,
+              "type": "string",
+              "readOnly": false,
+              "removed": true
+            },
+            {
+              "id": "Estado_Resultado",
+              "displayName": "Estado_Resultado",
+              "required": false,
+              "defaultMatch": false,
+              "canBeUsedToMatch": true,
+              "display": true,
+              "type": "options",
+              "options": [
+                {
+                  "name": "Exitoso",
+                  "value": "Exitoso"
+                },
+                {
+                  "name": "Error",
+                  "value": "Error"
+                },
+                {
+                  "name": "Pendiente",
+                  "value": "Pendiente"
+                },
+                {
+                  "name": "Timeout",
+                  "value": "Timeout"
+                }
+              ],
+              "readOnly": false,
+              "removed": false
+            }
+          ],
+          "attemptToConvertTypes": false,
+          "convertFieldsToString": false
+        },
+        "options": {}
+      },
+      "type": "n8n-nodes-base.airtable",
+      "typeVersion": 2.1,
+      "position": [
+        -192,
+        1728
+      ],
+      "id": "df834784-d32c-4c01-81ae-316bd33b26e6",
+      "name": "Create a record6"
+    },
+    {
+      "parameters": {
+        "operation": "create",
+        "base": {
+          "__rl": true,
+          "value": "appIM8X2lshRuKnQb",
+          "mode": "list",
+          "cachedResultName": "Club de Futbol",
+          "cachedResultUrl": "https://airtable.com/appIM8X2lshRuKnQb"
+        },
+        "table": {
+          "__rl": true,
+          "value": "tbl5aFVyWrkKph8Gj",
+          "mode": "list",
+          "cachedResultName": "Logs_Sistema",
+          "cachedResultUrl": "https://airtable.com/appIM8X2lshRuKnQb/tbl5aFVyWrkKph8Gj"
+        },
+        "columns": {
+          "mappingMode": "defineBelow",
+          "value": {
+            "Timestamp": "={{ $now }}",
+            "Evento": "Suscripcion_Creada",
+            "Origen": "n8n",
+            "Detalles": "=PLan creado: {{ $json.Plan }}",
+            "Estado_Resultado": "Exitoso"
+          },
+          "matchingColumns": [],
+          "schema": [
+            {
+              "id": "ID_Log",
+              "displayName": "ID_Log",
+              "required": false,
+              "defaultMatch": false,
+              "canBeUsedToMatch": true,
+              "display": true,
+              "type": "string",
+              "readOnly": false,
+              "removed": true
+            },
+            {
+              "id": "Timestamp",
+              "displayName": "Timestamp",
+              "required": false,
+              "defaultMatch": false,
+              "canBeUsedToMatch": true,
+              "display": true,
+              "type": "dateTime",
+              "readOnly": false,
+              "removed": false
+            },
+            {
+              "id": "Evento",
+              "displayName": "Evento",
+              "required": false,
+              "defaultMatch": false,
+              "canBeUsedToMatch": true,
+              "display": true,
+              "type": "options",
+              "options": [
+                {
+                  "name": "Suscripcion_Creada",
+                  "value": "Suscripcion_Creada"
+                },
+                {
+                  "name": "Suscripcion_Cancelada",
+                  "value": "Suscripcion_Cancelada"
+                },
+                {
+                  "name": "Pago_Procesado",
+                  "value": "Pago_Procesado"
+                },
+                {
+                  "name": "Pago_Rechazado",
+                  "value": "Pago_Rechazado"
+                },
+                {
+                  "name": "Consulta_Estado",
+                  "value": "Consulta_Estado"
+                },
+                {
+                  "name": "Error_Sistema",
+                  "value": "Error_Sistema"
+                },
+                {
+                  "name": "Envio_WhatsApp",
+                  "value": "Envio_WhatsApp"
+                },
+                {
+                  "name": "Suscripción_Actualizada",
+                  "value": "Suscripción_Actualizada"
+                }
+              ],
+              "readOnly": false,
+              "removed": false
+            },
+            {
+              "id": "DNI_Socio",
+              "displayName": "DNI_Socio",
+              "required": false,
+              "defaultMatch": false,
+              "canBeUsedToMatch": true,
+              "display": true,
+              "type": "string",
+              "readOnly": false,
+              "removed": true
+            },
+            {
+              "id": "Origen",
+              "displayName": "Origen",
+              "required": false,
+              "defaultMatch": false,
+              "canBeUsedToMatch": true,
+              "display": true,
+              "type": "options",
+              "options": [
+                {
+                  "name": "n8n",
+                  "value": "n8n"
+                },
+                {
+                  "name": "WordPress",
+                  "value": "WordPress"
+                },
+                {
+                  "name": "MercadoPago",
+                  "value": "MercadoPago"
+                },
+                {
+                  "name": "Airtable",
+                  "value": "Airtable"
+                },
+                {
+                  "name": "Manual",
+                  "value": "Manual"
+                }
+              ],
+              "readOnly": false,
+              "removed": false
+            },
+            {
+              "id": "Detalles",
+              "displayName": "Detalles",
+              "required": false,
+              "defaultMatch": false,
+              "canBeUsedToMatch": true,
+              "display": true,
+              "type": "string",
+              "readOnly": false,
+              "removed": false
+            },
+            {
+              "id": "IP_Address",
+              "displayName": "IP_Address",
+              "required": false,
+              "defaultMatch": false,
+              "canBeUsedToMatch": true,
+              "display": true,
+              "type": "string",
+              "readOnly": false,
+              "removed": true
+            },
+            {
+              "id": "Usuario_Sistema",
+              "displayName": "Usuario_Sistema",
+              "required": false,
+              "defaultMatch": false,
+              "canBeUsedToMatch": true,
+              "display": true,
+              "type": "string",
+              "readOnly": false,
+              "removed": true
+            },
+            {
+              "id": "Estado_Resultado",
+              "displayName": "Estado_Resultado",
+              "required": false,
+              "defaultMatch": false,
+              "canBeUsedToMatch": true,
+              "display": true,
+              "type": "options",
+              "options": [
+                {
+                  "name": "Exitoso",
+                  "value": "Exitoso"
+                },
+                {
+                  "name": "Error",
+                  "value": "Error"
+                },
+                {
+                  "name": "Pendiente",
+                  "value": "Pendiente"
+                },
+                {
+                  "name": "Timeout",
+                  "value": "Timeout"
+                }
+              ],
+              "readOnly": false,
+              "removed": false
+            }
+          ],
+          "attemptToConvertTypes": false,
+          "convertFieldsToString": false
+        },
+        "options": {}
+      },
+      "type": "n8n-nodes-base.airtable",
+      "typeVersion": 2.1,
+      "position": [
+        -208,
+        1920
+      ],
+      "id": "524993f0-9998-46a1-9c44-ba2e2280797b",
+      "name": "Create a record7",
+      "credentials": {
+        "airtableTokenApi": {
+          "id": "Nj7unxgUbkJOdf1K",
+          "name": "Fulbo"
+        }
+      }
+    },
+    {
+      "parameters": {
+        "conditions": {
+          "options": {
+            "caseSensitive": true,
+            "leftValue": "",
+            "typeValidation": "strict",
+            "version": 2
+          },
+          "conditions": [
+            {
+              "id": "0029de93-1d4c-4e65-bd4c-9fef7e8a7e4e",
+              "leftValue": "={{ $('📊 Obtener Datos del Socio').item.json.Enlace_Suscripcion_MP }}",
+              "rightValue": "",
+              "operator": {
+                "type": "string",
+                "operation": "notEmpty",
+                "singleValue": true
+              }
+            }
+          ],
+          "combinator": "and"
+        },
+        "options": {}
+      },
+      "type": "n8n-nodes-base.if",
+      "typeVersion": 2.2,
+      "position": [
+        -928,
+        1808
+      ],
+      "id": "a42a7969-d8e8-4ffa-841d-b2aac9e59bab",
+      "name": "If3"
+    },
+    {
+      "parameters": {
+        "operation": "upsert",
+        "base": {
+          "__rl": true,
+          "value": "appIM8X2lshRuKnQb",
+          "mode": "list",
+          "cachedResultName": "Club de Futbol",
+          "cachedResultUrl": "https://airtable.com/appIM8X2lshRuKnQb"
+        },
+        "table": {
+          "__rl": true,
+          "value": "tbl0oONKSWiRuqX67",
+          "mode": "list",
+          "cachedResultName": "Socios",
+          "cachedResultUrl": "https://airtable.com/appIM8X2lshRuKnQb/tbl0oONKSWiRuqX67"
+        },
+        "columns": {
+          "mappingMode": "defineBelow",
+          "value": {
+            "id": "={{ $('📊 Obtener Datos del Socio').item.json.id }}",
+            "ID_Suscripcion_MP": "={{ $json.id }}",
+            "Enlace_Suscripcion_MP": "={{ $json.init_point }}",
+            "Estado_Suscripcion": "Pendiente"
+          },
+          "matchingColumns": [
+            "id"
+          ],
+          "schema": [
+            {
+              "id": "id",
+              "displayName": "id",
+              "required": false,
+              "defaultMatch": true,
+              "display": true,
+              "type": "string",
+              "readOnly": true
+            },
+            {
+              "id": "Nombre_Completo",
+              "displayName": "Nombre_Completo",
+              "required": false,
+              "defaultMatch": false,
+              "canBeUsedToMatch": true,
+              "display": true,
+              "type": "string",
+              "readOnly": false,
+              "removed": true
+            },
+            {
+              "id": "DNI",
+              "displayName": "DNI",
+              "required": false,
+              "defaultMatch": false,
+              "canBeUsedToMatch": true,
+              "display": true,
+              "type": "string",
+              "readOnly": false,
+              "removed": true
+            },
+            {
+              "id": "Fecha_Nacimiento",
+              "displayName": "Fecha_Nacimiento",
+              "required": false,
+              "defaultMatch": false,
+              "canBeUsedToMatch": true,
+              "display": true,
+              "type": "dateTime",
+              "readOnly": false,
+              "removed": true
+            },
+            {
+              "id": "WhatsApp",
+              "displayName": "WhatsApp",
+              "required": false,
+              "defaultMatch": false,
+              "canBeUsedToMatch": true,
+              "display": true,
+              "type": "string",
+              "readOnly": false,
+              "removed": true
+            },
+            {
+              "id": "Categoría",
+              "displayName": "Categoría",
+              "required": false,
+              "defaultMatch": false,
+              "canBeUsedToMatch": true,
+              "display": true,
+              "type": "array",
+              "readOnly": false,
+              "removed": true
+            },
+            {
+              "id": "Monto",
+              "displayName": "Monto",
+              "required": false,
+              "defaultMatch": false,
+              "canBeUsedToMatch": true,
+              "display": true,
+              "type": "string",
+              "readOnly": true,
+              "removed": true
+            },
+            {
+              "id": "Fecha_Inscripcion",
+              "displayName": "Fecha_Inscripcion",
+              "required": false,
+              "defaultMatch": false,
+              "canBeUsedToMatch": true,
+              "display": true,
+              "type": "dateTime",
+              "readOnly": false,
+              "removed": true
+            },
+            {
+              "id": "Estado_Socio",
+              "displayName": "Estado_Socio",
+              "required": false,
+              "defaultMatch": false,
+              "canBeUsedToMatch": true,
+              "display": true,
+              "type": "options",
+              "options": [
+                {
+                  "name": "Activo",
+                  "value": "Activo"
+                },
+                {
+                  "name": "Inactivo",
+                  "value": "Inactivo"
+                },
+                {
+                  "name": "Suspendido",
+                  "value": "Suspendido"
+                }
+              ],
+              "readOnly": false,
+              "removed": true
+            },
+            {
+              "id": "ID_Suscripcion_MP",
+              "displayName": "ID_Suscripcion_MP",
+              "required": false,
+              "defaultMatch": false,
+              "canBeUsedToMatch": true,
+              "display": true,
+              "type": "string",
+              "readOnly": false,
+              "removed": false
+            },
+            {
+              "id": "Enlace_Suscripcion_MP",
+              "displayName": "Enlace_Suscripcion_MP",
+              "required": false,
+              "defaultMatch": false,
+              "canBeUsedToMatch": true,
+              "display": true,
+              "type": "string",
+              "readOnly": false,
+              "removed": false
+            },
+            {
+              "id": "Estado_Suscripcion",
+              "displayName": "Estado_Suscripcion",
+              "required": false,
+              "defaultMatch": false,
+              "canBeUsedToMatch": true,
+              "display": true,
+              "type": "options",
+              "options": [
+                {
+                  "name": "Pendiente",
+                  "value": "Pendiente"
+                },
+                {
+                  "name": "Activa",
+                  "value": "Activa"
+                },
+                {
+                  "name": "Cancelada",
+                  "value": "Cancelada"
+                }
+              ],
+              "readOnly": false,
+              "removed": false
+            },
+            {
+              "id": "Crear Suscripción",
+              "displayName": "Crear Suscripción",
+              "required": false,
+              "defaultMatch": false,
+              "canBeUsedToMatch": true,
+              "display": true,
+              "type": "string",
+              "readOnly": true,
+              "removed": true
+            },
+            {
+              "id": "Cancelar Suscripción",
+              "displayName": "Cancelar Suscripción",
+              "required": false,
+              "defaultMatch": false,
+              "canBeUsedToMatch": true,
+              "display": true,
+              "type": "string",
+              "readOnly": true,
+              "removed": true
+            },
+            {
+              "id": "Fecha_Creacion_Suscripcion",
+              "displayName": "Fecha_Creacion_Suscripcion",
+              "required": false,
+              "defaultMatch": false,
+              "canBeUsedToMatch": true,
+              "display": true,
+              "type": "dateTime",
+              "readOnly": false,
+              "removed": true
+            },
+            {
+              "id": "Email_madre_Padre",
+              "displayName": "Email_madre_Padre",
+              "required": false,
+              "defaultMatch": false,
+              "canBeUsedToMatch": true,
+              "display": true,
+              "type": "string",
+              "readOnly": false,
+              "removed": true
+            },
+            {
+              "id": "Edad_Actual",
+              "displayName": "Edad_Actual",
+              "required": false,
+              "defaultMatch": false,
+              "canBeUsedToMatch": true,
+              "display": true,
+              "type": "string",
+              "readOnly": true,
+              "removed": true
+            },
+            {
+              "id": "Ultimo_Pago_Registrado",
+              "displayName": "Ultimo_Pago_Registrado",
+              "required": false,
+              "defaultMatch": false,
+              "canBeUsedToMatch": true,
+              "display": true,
+              "type": "dateTime",
+              "readOnly": false,
+              "removed": true
+            },
+            {
+              "id": "Meses_Adeudados",
+              "displayName": "Meses_Adeudados",
+              "required": false,
+              "defaultMatch": false,
+              "canBeUsedToMatch": true,
+              "display": true,
+              "type": "number",
+              "readOnly": false,
+              "removed": true
+            },
+            {
+              "id": "Total_Deuda",
+              "displayName": "Total_Deuda",
+              "required": false,
+              "defaultMatch": false,
+              "canBeUsedToMatch": true,
+              "display": true,
+              "type": "number",
+              "readOnly": false,
+              "removed": true
+            },
+            {
+              "id": "Notas",
+              "displayName": "Notas",
+              "required": false,
+              "defaultMatch": false,
+              "canBeUsedToMatch": true,
+              "display": true,
+              "type": "string",
+              "readOnly": false,
+              "removed": true
+            },
+            {
+              "id": "Pagos_Mensuales",
+              "displayName": "Pagos_Mensuales",
+              "required": false,
+              "defaultMatch": false,
+              "canBeUsedToMatch": true,
+              "display": true,
+              "type": "array",
+              "readOnly": false,
+              "removed": true
+            },
+            {
+              "id": "Padres",
+              "displayName": "Padres",
+              "required": false,
+              "defaultMatch": false,
+              "canBeUsedToMatch": true,
+              "display": true,
+              "type": "array",
+              "readOnly": false,
+              "removed": true
+            },
+            {
+              "id": "Accion_Suscripcion",
+              "displayName": "Accion_Suscripcion",
+              "required": false,
+              "defaultMatch": false,
+              "canBeUsedToMatch": true,
+              "display": true,
+              "type": "options",
+              "options": [
+                {
+                  "name": "Crear_Suscripcion",
+                  "value": "Crear_Suscripcion"
+                },
+                {
+                  "name": "Cancelar_Suscripcion",
+                  "value": "Cancelar_Suscripcion"
+                },
+                {
+                  "name": "Sin_Accion",
+                  "value": "Sin_Accion"
+                }
+              ],
+              "readOnly": false,
+              "removed": true
+            },
+            {
+              "id": "Procesado_Accion",
+              "displayName": "Procesado_Accion",
+              "required": false,
+              "defaultMatch": false,
+              "canBeUsedToMatch": true,
+              "display": true,
+              "type": "dateTime",
+              "readOnly": false,
+              "removed": true
+            },
+            {
+              "id": "Fecha_Ultimo_Problema_Pago",
+              "displayName": "Fecha_Ultimo_Problema_Pago",
+              "required": false,
+              "defaultMatch": false,
+              "canBeUsedToMatch": true,
+              "display": true,
+              "type": "dateTime",
+              "readOnly": false,
+              "removed": true
+            },
+            {
+              "id": "Intentos_Renovacion",
+              "displayName": "Intentos_Renovacion",
+              "required": false,
+              "defaultMatch": false,
+              "canBeUsedToMatch": true,
+              "display": true,
+              "type": "number",
+              "readOnly": false,
+              "removed": true
+            }
+          ],
+          "attemptToConvertTypes": false,
+          "convertFieldsToString": false
+        },
+        "options": {
+          "typecast": true
+        }
+      },
+      "type": "n8n-nodes-base.airtable",
+      "typeVersion": 2.1,
+      "position": [
+        -400,
+        1920
+      ],
+      "id": "8f842b50-498a-4c41-a2fa-be79c23343ae",
+      "name": "Create or update a record8"
+    },
+    {
+      "parameters": {
+        "operation": "upsert",
+        "base": {
+          "__rl": true,
+          "value": "appIM8X2lshRuKnQb",
+          "mode": "list",
+          "cachedResultName": "Club de Futbol",
+          "cachedResultUrl": "https://airtable.com/appIM8X2lshRuKnQb"
+        },
+        "table": {
+          "__rl": true,
+          "value": "tbl0oONKSWiRuqX67",
+          "mode": "list",
+          "cachedResultName": "Socios",
+          "cachedResultUrl": "https://airtable.com/appIM8X2lshRuKnQb/tbl0oONKSWiRuqX67"
+        },
+        "columns": {
+          "mappingMode": "defineBelow",
+          "value": {
+            "id": "={{ $('📊 Obtener Datos del Socio').item.json.id }}",
+            "ID_Suscripcion_MP": "={{ $json.id }}",
+            "Enlace_Suscripcion_MP": "={{ $json.init_point }}",
+            "Estado_Suscripcion": "Activa",
+            "Fecha_última_Actualizacion": "={{ $json.last_modified }}"
+          },
+          "matchingColumns": [
+            "id"
+          ],
+          "schema": [
+            {
+              "id": "id",
+              "displayName": "id",
+              "required": false,
+              "defaultMatch": true,
+              "display": true,
+              "type": "string",
+              "readOnly": true,
+              "removed": false
+            },
+            {
+              "id": "Nombre_Completo",
+              "displayName": "Nombre_Completo",
+              "required": false,
+              "defaultMatch": false,
+              "canBeUsedToMatch": true,
+              "display": true,
+              "type": "string",
+              "readOnly": false,
+              "removed": true
+            },
+            {
+              "id": "DNI",
+              "displayName": "DNI",
+              "required": false,
+              "defaultMatch": false,
+              "canBeUsedToMatch": true,
+              "display": true,
+              "type": "string",
+              "readOnly": false,
+              "removed": true
+            },
+            {
+              "id": "Fecha_Nacimiento",
+              "displayName": "Fecha_Nacimiento",
+              "required": false,
+              "defaultMatch": false,
+              "canBeUsedToMatch": true,
+              "display": true,
+              "type": "dateTime",
+              "readOnly": false,
+              "removed": true
+            },
+            {
+              "id": "WhatsApp",
+              "displayName": "WhatsApp",
+              "required": false,
+              "defaultMatch": false,
+              "canBeUsedToMatch": true,
+              "display": true,
+              "type": "string",
+              "readOnly": false,
+              "removed": true
+            },
+            {
+              "id": "Categoría",
+              "displayName": "Categoría",
+              "required": false,
+              "defaultMatch": false,
+              "canBeUsedToMatch": true,
+              "display": true,
+              "type": "array",
+              "readOnly": false,
+              "removed": true
+            },
+            {
+              "id": "Categoria (from Categoría)",
+              "displayName": "Categoria (from Categoría)",
+              "required": false,
+              "defaultMatch": false,
+              "canBeUsedToMatch": true,
+              "display": true,
+              "type": "string",
+              "readOnly": true,
+              "removed": true
+            },
+            {
+              "id": "Monto",
+              "displayName": "Monto",
+              "required": false,
+              "defaultMatch": false,
+              "canBeUsedToMatch": true,
+              "display": true,
+              "type": "string",
+              "readOnly": true,
+              "removed": true
+            },
+            {
+              "id": "Fecha_Inscripcion",
+              "displayName": "Fecha_Inscripcion",
+              "required": false,
+              "defaultMatch": false,
+              "canBeUsedToMatch": true,
+              "display": true,
+              "type": "dateTime",
+              "readOnly": false,
+              "removed": true
+            },
+            {
+              "id": "Estado_Socio",
+              "displayName": "Estado_Socio",
+              "required": false,
+              "defaultMatch": false,
+              "canBeUsedToMatch": true,
+              "display": true,
+              "type": "options",
+              "options": [
+                {
+                  "name": "Activo",
+                  "value": "Activo"
+                },
+                {
+                  "name": "Inactivo",
+                  "value": "Inactivo"
+                },
+                {
+                  "name": "Suspendido",
+                  "value": "Suspendido"
+                }
+              ],
+              "readOnly": false,
+              "removed": true
+            },
+            {
+              "id": "ID_Suscripcion_MP",
+              "displayName": "ID_Suscripcion_MP",
+              "required": false,
+              "defaultMatch": false,
+              "canBeUsedToMatch": true,
+              "display": true,
+              "type": "string",
+              "readOnly": false,
+              "removed": false
+            },
+            {
+              "id": "Enlace_Suscripcion_MP",
+              "displayName": "Enlace_Suscripcion_MP",
+              "required": false,
+              "defaultMatch": false,
+              "canBeUsedToMatch": true,
+              "display": true,
+              "type": "string",
+              "readOnly": false,
+              "removed": false
+            },
+            {
+              "id": "Estado_Suscripcion",
+              "displayName": "Estado_Suscripcion",
+              "required": false,
+              "defaultMatch": false,
+              "canBeUsedToMatch": true,
+              "display": true,
+              "type": "options",
+              "options": [
+                {
+                  "name": "Pendiente",
+                  "value": "Pendiente"
+                },
+                {
+                  "name": "Activa",
+                  "value": "Activa"
+                },
+                {
+                  "name": "Cancelada",
+                  "value": "Cancelada"
+                },
+                {
+                  "name": "Pausada por error en pago",
+                  "value": "Pausada por error en pago"
+                }
+              ],
+              "readOnly": false,
+              "removed": false
+            },
+            {
+              "id": "Último Pago",
+              "displayName": "Último Pago",
+              "required": false,
+              "defaultMatch": false,
+              "canBeUsedToMatch": true,
+              "display": true,
+              "type": "options",
+              "options": [
+                {
+                  "name": "Aprobado",
+                  "value": "Aprobado"
+                },
+                {
+                  "name": "Rechazado",
+                  "value": "Rechazado"
+                }
+              ],
+              "readOnly": false,
+              "removed": true
+            },
+            {
+              "id": "Crear Suscripción",
+              "displayName": "Crear Suscripción",
+              "required": false,
+              "defaultMatch": false,
+              "canBeUsedToMatch": true,
+              "display": true,
+              "type": "string",
+              "readOnly": true,
+              "removed": true
+            },
+            {
+              "id": "Fecha_Primer_Pago",
+              "displayName": "Fecha_Primer_Pago",
+              "required": false,
+              "defaultMatch": false,
+              "canBeUsedToMatch": true,
+              "display": true,
+              "type": "dateTime",
+              "readOnly": false,
+              "removed": true
+            },
+            {
+              "id": "Actualizar monto/categoria",
+              "displayName": "Actualizar monto/categoria",
+              "required": false,
+              "defaultMatch": false,
+              "canBeUsedToMatch": true,
+              "display": true,
+              "type": "string",
+              "readOnly": true,
+              "removed": true
+            },
+            {
+              "id": "Fecha_última_Actualizacion",
+              "displayName": "Fecha_última_Actualizacion",
+              "required": false,
+              "defaultMatch": false,
+              "canBeUsedToMatch": true,
+              "display": true,
+              "type": "dateTime",
+              "readOnly": false,
+              "removed": false
+            },
+            {
+              "id": "Cancelar Suscripción",
+              "displayName": "Cancelar Suscripción",
+              "required": false,
+              "defaultMatch": false,
+              "canBeUsedToMatch": true,
+              "display": true,
+              "type": "string",
+              "readOnly": true,
+              "removed": true
+            },
+            {
+              "id": "Email_madre_Padre",
+              "displayName": "Email_madre_Padre",
+              "required": false,
+              "defaultMatch": false,
+              "canBeUsedToMatch": true,
+              "display": true,
+              "type": "string",
+              "readOnly": false,
+              "removed": true
+            },
+            {
+              "id": "Edad_Actual",
+              "displayName": "Edad_Actual",
+              "required": false,
+              "defaultMatch": false,
+              "canBeUsedToMatch": true,
+              "display": true,
+              "type": "string",
+              "readOnly": true,
+              "removed": true
+            },
+            {
+              "id": "Ultimo_Pago_Registrado",
+              "displayName": "Ultimo_Pago_Registrado",
+              "required": false,
+              "defaultMatch": false,
+              "canBeUsedToMatch": true,
+              "display": true,
+              "type": "dateTime",
+              "readOnly": false,
+              "removed": true
+            },
+            {
+              "id": "Meses_Adeudados",
+              "displayName": "Meses_Adeudados",
+              "required": false,
+              "defaultMatch": false,
+              "canBeUsedToMatch": true,
+              "display": true,
+              "type": "number",
+              "readOnly": false,
+              "removed": true
+            },
+            {
+              "id": "Total_Deuda",
+              "displayName": "Total_Deuda",
+              "required": false,
+              "defaultMatch": false,
+              "canBeUsedToMatch": true,
+              "display": true,
+              "type": "number",
+              "readOnly": false,
+              "removed": true
+            },
+            {
+              "id": "Notas",
+              "displayName": "Notas",
+              "required": false,
+              "defaultMatch": false,
+              "canBeUsedToMatch": true,
+              "display": true,
+              "type": "string",
+              "readOnly": false,
+              "removed": true
+            },
+            {
+              "id": "Pagos_Mensuales",
+              "displayName": "Pagos_Mensuales",
+              "required": false,
+              "defaultMatch": false,
+              "canBeUsedToMatch": true,
+              "display": true,
+              "type": "array",
+              "readOnly": false,
+              "removed": true
+            },
+            {
+              "id": "Padres",
+              "displayName": "Padres",
+              "required": false,
+              "defaultMatch": false,
+              "canBeUsedToMatch": true,
+              "display": true,
+              "type": "array",
+              "readOnly": false,
+              "removed": true
+            },
+            {
+              "id": "Procesado_Accion",
+              "displayName": "Procesado_Accion",
+              "required": false,
+              "defaultMatch": false,
+              "canBeUsedToMatch": true,
+              "display": true,
+              "type": "dateTime",
+              "readOnly": false,
+              "removed": true
+            },
+            {
+              "id": "Fecha_Ultimo_Problema_Pago",
+              "displayName": "Fecha_Ultimo_Problema_Pago",
+              "required": false,
+              "defaultMatch": false,
+              "canBeUsedToMatch": true,
+              "display": true,
+              "type": "dateTime",
+              "readOnly": false,
+              "removed": true
+            },
+            {
+              "id": "Intentos_Renovacion",
+              "displayName": "Intentos_Renovacion",
+              "required": false,
+              "defaultMatch": false,
+              "canBeUsedToMatch": true,
+              "display": true,
+              "type": "number",
+              "readOnly": false,
+              "removed": true
+            }
+          ],
+          "attemptToConvertTypes": false,
+          "convertFieldsToString": false
+        },
+        "options": {
+          "typecast": true
+        }
+      },
+      "type": "n8n-nodes-base.airtable",
+      "typeVersion": 2.1,
+      "position": [
+        -400,
+        1728
+      ],
+      "id": "a3b87d7c-cab2-489d-a113-4f7e60876862",
+      "name": "Create or update a record4",
+      "credentials": {
+        "airtableTokenApi": {
+          "id": "Nj7unxgUbkJOdf1K",
+          "name": "Fulbo"
+        }
+      }
+    }
+  ],
+  "pinData": {
+    "🔗 Webhook - Botón Airtable": [
+      {
+        "json": {
+          "headers": {
+            "host": "manager.automatizatuempresa.com.ar",
+            "user-agent": "Mozilla/5.0 (Windows NT 10.0; Win64; x64) AppleWebKit/537.36 (KHTML, like Gecko) Chrome/135.0.0.0 Safari/537.36 OPR/120.0.0.0",
+            "accept": "text/html,application/xhtml+xml,application/xml;q=0.9,image/avif,image/webp,image/apng,*/*;q=0.8,application/signed-exchange;v=b3;q=0.7",
+            "accept-encoding": "gzip, deflate, br, zstd",
+            "accept-language": "es-ES,es;q=0.9,en;q=0.8,uk;q=0.7,zh-CN;q=0.6,zh;q=0.5,pt-BR;q=0.4,pt;q=0.3,de;q=0.2",
+            "cookie": "rl_page_init_referrer=RudderEncrypt%3AU2FsdGVkX1%2B1dFFoqlNVKmvQ%2Fw%2BVwfB97W0%2BnvDcH%2BI%3D; rl_page_init_referring_domain=RudderEncrypt%3AU2FsdGVkX18%2BPBPsk2JVYM23eqmyYIK8hNCSExXw%2ByY%3D; ajs_anonymous_id=%22bcf8424e-fb6f-4534-93ad-399721344381%22; _ga_C0MJH0Q6PM=GS2.1.s1754526400$o6$g0$t1754526400$j60$l0$h0; _ga=GA1.3.268640228.1753893291; _ga_9Q6H0QETRF=GS2.3.s1762877014$o1$g0$t1762877014$j60$l0$h0; rl_anonymous_id=RudderEncrypt%3AU2FsdGVkX1%2B4e%2FjgxXApP0ixHC6N%2FEHFTov2nrMHbAHKjGh3HcAHb0O6FgKeGJKv1nERa55I%2FFk%2BNoQZF1%2F4vw%3D%3D; rl_user_id=RudderEncrypt%3AU2FsdGVkX1%2FFSXmGqlF8NB%2BAazUmWsrGEzhJ6xdv8MSjZy82sHSqFCBDeAa%2FEvXWObbDiWqqsXdCF1TNRZS%2B8gCjGxroLkE%2B7nzmoH92%2FeFRChTcjQlaVPFJz0rARlnhx5cZsuL71zkkpMPLxlSYwZ1Isvulk0%2BB3jNBe2ZXwV0%3D; rl_trait=RudderEncrypt%3AU2FsdGVkX19TnQoIwIlvgB9paHtM93jWw%2BSt2LFgIkWoMIeio60Anbe4Ebx55%2FOBIqmuO6CNLSkk10o%2BMnhFDdAezswkhZ0X3Ynx78AURA%2FxtRhK5Qwj2xzN6CBKkP5fwJoHzrspTaYMxoCCQI0nUKnRGUSP33mAktdegFSKEgw%3D; ph_phc_4URIAm1uYfJO7j8kWSe0J8lc8IqnstRLS7Jx8NcakHo_posthog=%7B%22distinct_id%22%3A%22ccb6df3b438220c7333ad9118520162eab2b265941aadb0879e8e657976225af%2343aab332-ac1c-4069-8293-64f7945bfb51%22%2C%22%24sesid%22%3A%5B1763471593046%2C%22019a9719-0e5d-7e57-9464-c8ef5847b508%22%2C1763471593046%5D%2C%22%24epp%22%3Atrue%2C%22%24initial_person_info%22%3A%7B%22r%22%3A%22%24direct%22%2C%22u%22%3A%22https%3A%2F%2Fmanager.automatizatuempresa.com.ar%2Fsignin%3Fredirect%3D%25252F%22%7D%7D; rl_session=RudderEncrypt%3AU2FsdGVkX1%2BX%2Ff3ikaV9xL7g16nloSH3iWZmPnA%2BPLB65pXkHLkMehZ4QEyUOLHei9t2F4fQrdSiCDMGurZcVSLCXWX6SS4%2B%2F35ca1w3KLOeFM9D7jR0Nx7NegqRc8wnxMTLCo6VwmDcpIdDRUiqVQ%3D%3D",
+            "if-none-match": "W/\"17-KRNR93v9DYDcVj8dTLiIul8EwKU\"",
+            "priority": "u=0, i",
+            "sec-ch-ua": "\"Opera\";v=\"120\", \"Not-A.Brand\";v=\"8\", \"Chromium\";v=\"135\"",
+            "sec-ch-ua-mobile": "?0",
+            "sec-ch-ua-platform": "\"Windows\"",
+            "sec-fetch-dest": "document",
+            "sec-fetch-mode": "navigate",
+            "sec-fetch-site": "cross-site",
+            "sec-fetch-user": "?1",
+            "upgrade-insecure-requests": "1",
+            "x-forwarded-for": "138.84.63.91",
+            "x-forwarded-host": "manager.automatizatuempresa.com.ar",
+            "x-forwarded-port": "443",
+            "x-forwarded-proto": "https",
+            "x-forwarded-server": "cdbdbca313e3",
+            "x-real-ip": "138.84.63.91"
+          },
+          "params": {},
+          "query": {
+            "record_id": "rec88W4qAtuhCFh7U"
+          },
+          "body": {},
+          "webhookUrl": "https://manager.automatizatuempresa.com.ar/webhook/webhook-crear-suscripcion-club",
+          "executionMode": "production"
+        }
+      }
+    ]
+  },
+  "connections": {
+    "🔗 Webhook - Botón Airtable": {
+      "main": [
+        [
+          {
+            "node": "📊 Obtener Datos del Socio",
+            "type": "main",
+            "index": 0
+          }
+        ]
+      ]
+    },
+    "📊 Obtener Datos del Socio": {
+      "main": [
+        [
+          {
+            "node": "If3",
+            "type": "main",
+            "index": 0
+          }
+        ]
+      ]
+    },
+    "🆕 Crear Plan MP": {
+      "main": [
+        [
+          {
+            "node": "Create or update a record",
+            "type": "main",
+            "index": 0
+          }
+        ]
+      ]
+    },
+    "🔄 Actualizar Plan MP": {
+      "main": [
+        [
+          {
+            "node": "Create or update a record1",
+            "type": "main",
+            "index": 0
+          }
+        ]
+      ]
+    },
+    "Create or update a record": {
+      "main": [
+        [
+          {
+            "node": "Create a record1",
+            "type": "main",
+            "index": 0
+          }
+        ]
+      ]
+    },
+    "Create or update a record1": {
+      "main": [
+        [
+          {
+            "node": "Create a record",
+            "type": "main",
+            "index": 0
+          }
+        ]
+      ]
+    },
+    "If": {
+      "main": [
+        [
+          {
+            "node": "🔄 Actualizar Plan MP",
+            "type": "main",
+            "index": 0
+          }
+        ],
+        [
+          {
+            "node": "🆕 Crear Plan MP",
+            "type": "main",
+            "index": 0
+          }
+        ]
+      ]
+    },
+    "🔄 Actualizar Plan MP1": {
+      "main": [
+        [
+          {
+            "node": "Create or update a record2",
+            "type": "main",
+            "index": 0
+          }
+        ]
+      ]
+    },
+    "If1": {
+      "main": [
+        [
+          {
+            "node": "🔄 Actualizar Plan MP1",
+            "type": "main",
+            "index": 0
+          }
+        ],
+        [
+          {
+            "node": "🆕 Crear Plan MP1",
+            "type": "main",
+            "index": 0
+          }
+        ]
+      ]
+    },
+    "🔄 Actualizar Plan MP2": {
+      "main": [
+        [
+          {
+            "node": "Create or update a record3",
+            "type": "main",
+            "index": 0
+          }
+        ]
+      ]
+    },
+    "If2": {
+      "main": [
+        [
+          {
+            "node": "🔄 Actualizar Plan MP2",
+            "type": "main",
+            "index": 0
+          }
+        ],
+        [
+          {
+            "node": "🆕 Crear Plan MP2",
+            "type": "main",
+            "index": 0
+          }
+        ]
+      ]
+    },
+    "🆕 Crear Plan MP1": {
+      "main": [
+        [
+          {
+            "node": "Create or update a record6",
+            "type": "main",
+            "index": 0
+          }
+        ]
+      ]
+    },
+    "Create or update a record6": {
+      "main": [
+        [
+          {
+            "node": "Create a record3",
+            "type": "main",
+            "index": 0
+          }
+        ]
+      ]
+    },
+    "🆕 Crear Plan MP2": {
+      "main": [
+        [
+          {
+            "node": "Create or update a record7",
+            "type": "main",
+            "index": 0
+          }
+        ]
+      ]
+    },
+    "Create or update a record7": {
+      "main": [
+        [
+          {
+            "node": "Create a record5",
+            "type": "main",
+            "index": 0
+          }
+        ]
+      ]
+    },
+    "Create or update a record3": {
+      "main": [
+        [
+          {
+            "node": "Create a record4",
+            "type": "main",
+            "index": 0
+          }
+        ]
+      ]
+    },
+    "Create or update a record2": {
+      "main": [
+        [
+          {
+            "node": "Create a record2",
+            "type": "main",
+            "index": 0
+          }
+        ]
+      ]
+    },
+    "🆕 Crear Plan MP3": {
+      "main": [
+        [
+          {
+            "node": "Create or update a record8",
+            "type": "main",
+            "index": 0
+          }
+        ]
+      ]
+    },
+    "🔄 Actualizar Plan MP3": {
+      "main": [
+        [
+          {
+            "node": "Create or update a record4",
+            "type": "main",
+            "index": 0
+          }
+        ]
+      ]
+    },
+    "If3": {
+      "main": [
+        [
+          {
+            "node": "🔄 Actualizar Plan MP3",
+            "type": "main",
+            "index": 0
+          }
+        ],
+        [
+          {
+            "node": "🆕 Crear Plan MP3",
+            "type": "main",
+            "index": 0
+          }
+        ]
+      ]
+    },
+    "Create or update a record8": {
+      "main": [
+        [
+          {
+            "node": "Create a record7",
+            "type": "main",
+            "index": 0
+          }
+        ]
+      ]
+    },
+    "Create or update a record4": {
+      "main": [
+        [
+          {
+            "node": "Create a record6",
+            "type": "main",
+            "index": 0
+          }
+        ]
+      ]
+    }
+  },
+  "active": false,
+  "settings": {
+    "executionOrder": "v1"
+  },
+  "versionId": "85835e3e-316c-40be-8bd1-720a2bbb648c",
+  "meta": {
+    "instanceId": "a0396f984d7f6550d0d1b776eb935efaec088ae754fee6dc317b6ec7930ec4af"
+  },
+  "id": "HRZVx7J1W6A6eqsd",
+  "tags": []
+}

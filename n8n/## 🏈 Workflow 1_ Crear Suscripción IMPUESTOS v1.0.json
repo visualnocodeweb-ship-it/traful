@@ -1,0 +1,194 @@
+{
+  "name": "## 🏈 Workflow 1: Crear Suscripción IMPUESTOS v1.0",
+  "nodes": [
+    {
+      "parameters": {
+        "path": "webhook-crear-suscripcion-impuestos",
+        "options": {
+          "responseData": "Creando/Actualizando suscripción..."
+        }
+      },
+      "id": "71a60550-93d9-4bdd-87db-3857076c7fc3",
+      "name": "🔗 Webhook - Botón Airtable",
+      "type": "n8n-nodes-base.webhook",
+      "position": [
+        -1456,
+        1696
+      ],
+      "typeVersion": 2.1,
+      "webhookId": "e1f0fb04-1ea3-4d86-a56e-6684a4b274d4"
+    },
+    {
+      "parameters": {
+        "content": "## 🏈 Workflow 1: Crear Suscripción IMPUESTOS v1.0\n\n**Trigger:** Botón 'Crear_Suscripcion' en Airtable\n**Proceso:**\n1. Recibe record_id del contribuyente\n2. Obtiene datos del contribuyente\n3. Llama a la API de MercadoPago con el monto del contribuyente\n4. Actualiza Airtable con URL generada",
+        "height": 400,
+        "width": 720
+      },
+      "id": "afc71a94-8280-45d6-8a5d-bed812648669",
+      "name": "🏈 WORKFLOW 1: CREAR SUSCRIPCIÓN IMPUESTOS v1.0",
+      "type": "n8n-nodes-base.stickyNote",
+      "position": [
+        -1536,
+        1264
+      ],
+      "typeVersion": 1
+    },
+    {
+      "parameters": {
+        "base": {
+          "__rl": true,
+          "value": "appIM8X2lshRuKnQb",
+          "mode": "list",
+          "cachedResultName": "Club de Futbol"
+        },
+        "table": {
+          "__rl": true,
+          "value": "tblkDdStrgao4WDib",
+          "mode": "list",
+          "cachedResultName": "Contribuyentes"
+        },
+        "id": "={{ $json.query.record_id }}",
+        "options": {}
+      },
+      "id": "0f326e56-ed17-4554-baf8-f4827cf8cf22",
+      "name": "📊 Obtener Datos del Contribuyente",
+      "type": "n8n-nodes-base.airtable",
+      "position": [
+        -1200,
+        1696
+      ],
+      "typeVersion": 2.1,
+      "retryOnFail": true,
+      "credentials": {
+        "airtableTokenApi": {
+          "id": "Nj7unxgUbkJOdf1K",
+          "name": "Fulbo"
+        }
+      }
+    },
+    {
+      "parameters": {
+        "method": "POST",
+        "url": "https://api.mercadopago.com/preapproval_plan",
+        "sendHeaders": true,
+        "headerParameters": {
+          "parameters": [
+            {
+              "name": "Content-Type",
+              "value": "application/json"
+            },
+            {
+              "name": "Authorization",
+              "value": "Bearer APP_USR-1575907424726657-111310-7a725029aa4094e75e3fe1db2b513a61-2677689551"
+            }
+          ]
+        },
+        "sendBody": true,
+        "specifyBody": "json",
+        "jsonBody": "={\n  \"reason\": \"{{ $('📊 Obtener Datos del Contribuyente').item.json.fields.Tipo_Impuesto }}\",\n  \"auto_recurring\": {\n    \"frequency\": 1,\n    \"frequency_type\": \"months\",\n    \"transaction_amount\": {{ $('📊 Obtener Datos del Contribuyente').item.json.fields.Monto_Mensual_Impuesto }},\n    \"currency_id\": \"ARS\"\n  },\n  \"back_url\": \"https://mercadopago.com.ar\",\n  \"external_reference\": \"{{ $('📊 Obtener Datos del Contribuyente').item.json.fields.ID_Contribuyente }}\"\n}\n",
+        "options": {
+          "response": {
+            "response": {
+              "neverError": true
+            }
+          }
+        }
+      },
+      "id": "16255f03-1a8f-4362-9628-8da0632eb018",
+      "name": "🆕 Crear Plan MP",
+      "type": "n8n-nodes-base.httpRequest",
+      "position": [
+        -860,
+        1696
+      ],
+      "typeVersion": 4
+    },
+    {
+      "parameters": {
+        "operation": "upsert",
+        "base": {
+          "__rl": true,
+          "value": "appIM8X2lshRuKnQb",
+          "mode": "list",
+          "cachedResultName": "Club de Futbol"
+        },
+        "table": {
+          "__rl": true,
+          "value": "tblkDdStrgao4WDib",
+          "mode": "list",
+          "cachedResultName": "Contribuyentes"
+        },
+        "columns": {
+          "mappingMode": "defineBelow",
+          "value": {
+            "id": "={{ $('📊 Obtener Datos del Contribuyente').item.json.id }}",
+            "ID_Suscripcion_MP": "={{ $json.id }}",
+            "Enlace_Suscripcion_MP": "={{ $json.init_point }}",
+            "Estado_Suscripcion": "Pendiente"
+          },
+          "matchingColumns": [
+            "id"
+          ],
+          "schema": []
+        },
+        "options": {
+          "typecast": true
+        }
+      },
+      "type": "n8n-nodes-base.airtable",
+      "typeVersion": 2.1,
+      "position": [
+        -560,
+        1696
+      ],
+      "id": "e9de5541-1ece-4af4-9bcb-ed13cb4835fc",
+      "name": "Actualizar Airtable con Enlace"
+    }
+  ],
+  "pinData": {},
+  "connections": {
+    "🔗 Webhook - Botón Airtable": {
+      "main": [
+        [
+          {
+            "node": "📊 Obtener Datos del Contribuyente",
+            "type": "main",
+            "index": 0
+          }
+        ]
+      ]
+    },
+    "📊 Obtener Datos del Contribuyente": {
+      "main": [
+        [
+          {
+            "node": "🆕 Crear Plan MP",
+            "type": "main",
+            "index": 0
+          }
+        ]
+      ]
+    },
+    "🆕 Crear Plan MP": {
+      "main": [
+        [
+          {
+            "node": "Actualizar Airtable con Enlace",
+            "type": "main",
+            "index": 0
+          }
+        ]
+      ]
+    }
+  },
+  "active": false,
+  "settings": {
+    "executionOrder": "v1"
+  },
+  "versionId": "85835e3e-316c-40be-8bd1-720a2bbb648c",
+  "meta": {
+    "instanceId": "a0396f984d7f6550d0d1b776eb935efaec088ae754fee6dc317b6ec7930ec4af"
+  },
+  "id": "HRZVx7J1W6A6eqsd",
+  "tags": []
+}

@@ -1,0 +1,68 @@
+# Resumen del Proyecto: Sistema de Gestión de Impuestos Municipales
+
+## 1. Contexto Inicial: Análisis del Sistema Original
+
+- **Sistema Analizado**: Se analizó un sistema de gestión para una escuela de fútbol.
+- **Componentes**:
+    - **Airtable (Base de Datos)**: Con tablas como `Socios`, `Padre/Madres`, `Planes`, `Pagos_Mensuales`, `Configuracion_Sistema`, y `Logs_Sistema`.
+    - **n8n (Motor de Automatización)**: Con 3 flujos de trabajo principales analizados:
+        1.  `Crear Suscripción`: Activado por un botón en Airtable, genera un enlace de pago de MercadoPago.
+        2.  `Actualizacion Mercadopago`: Sincroniza pagos y estados de suscripción desde webhooks de MercadoPago hacia Airtable.
+        3.  `Cancelacion de planes`: Cancela una suscripción en MercadoPago, activado desde Airtable.
+- **Arquitectura Original**: Basada en "Planes" con precios fijos por categoría. La identificación de pagos se realizaba usando el `DNI` del socio como `external_reference` en MercadoPago.
+
+---
+
+## 2. Nuevo Objetivo: Pivotar a un Sistema de Impuestos Municipales
+
+- **Nuevo Propósito**: Adaptar el sistema para gestionar el cobro de impuestos municipales recurrentes (mensuales).
+- **Desafío Principal**: A diferencia del sistema original con precios fijos por plan, los impuestos municipales tienen un **monto variable para cada contribuyente**.
+
+---
+
+## 3. Solución Arquitectónica Propuesta
+
+- **Cambio de Lógica**: El monto a pagar ya no se define en una tabla de "Planes", sino que se asigna individualmente a cada contribuyente.
+- **Adaptación de Airtable**: Se definió que la tabla `Socios` se reemplazaría por `Contribuyentes` con un nuevo campo `Monto_Mensual_Impuesto`.
+- **Adaptación de n8n**: Modificar el flujo de "Crear Suscripción" para que tome su valor del nuevo campo `Monto_Mensual_Impuesto` del registro del contribuyente.
+
+---
+
+## 4. Plan de Importación de Datos
+
+- **Archivo Fuente**: Se utilizará el archivo `retributivos.csv`.
+- **Reglas de Mapeo**: `ID_Contribuyente` (DNI o Nomenclatura), `Nombre_Contribuyente`, `Monto_Mensual_Impuesto` (desde la columna DICIEMBRE), y `Tipo_Impuesto` ("Tasa Retributiva").
+
+---
+
+## 5. Avances Realizados (Fecha: 2025-12-04)
+
+### Paso 1: Preparación de Airtable e Importación de Datos (Completado)
+- Se desbloqueó el permiso de "Creador" en Airtable.
+- Se creó la tabla `Contribuyentes` con los campos necesarios: `ID_Contribuyente`, `Nombre_Contribuyente`, `Monto_Mensual_Impuesto` y `Tipo_Impuesto`.
+- Se generó el script `main.py` para procesar el `retributivos.csv`.
+- Tras varios pasos de depuración de credenciales y configuración de la tabla, se ejecutó el script exitosamente, **importando 62 registros** de contribuyentes a Airtable.
+
+### Paso 2: Adaptación del Flujo n8n "Crear Suscripción" (Completado)
+- **Objetivo**: Modificar el flujo para usar el monto variable de cada contribuyente.
+- Se creó una nueva versión del flujo: `## 🏈 Workflow 1_ Crear Suscripción IMPUESTOS v1.0.json`.
+- **Modificaciones Clave**:
+    1.  Se apuntó el nodo de obtención de datos de Airtable a la nueva tabla `Contribuyentes`.
+    2.  Se modificaron las expresiones en los nodos `HTTP Request` para usar los campos dinámicos: `Monto_Mensual_Impuesto`, `ID_Contribuyente` y `Tipo_Impuesto`.
+    3.  Se reemplazó un nodo problemático de Airtable "Update" por un nodo `HTTP Request` genérico para asegurar la correcta actualización de los registros en Airtable.
+- **Resultado**: El flujo se probó con éxito. Ahora, al presionar el botón en una fila de `Contribuyentes`, se genera un plan de suscripción en MercadoPago con el monto y los datos correctos, y se actualiza la fila original en Airtable con el enlace de pago y el ID de la suscripción.
+
+---
+
+## 6. Estado Actual y Próximos Pasos
+
+- **Lo que está hecho**: El sistema central para **crear enlaces de pago individualizados** está completo y funcional. Los datos iniciales de los contribuyentes están cargados.
+
+- **Lo que falta (Siguientes Pasos Recomendados)**:
+    1.  **Revisar y Adaptar los Otros Flujos de n8n**:
+        *   **`Actualizacion Mercadopago.json`**: Este es el próximo paso **CRÍTICO**. Este flujo probablemente se encarga de escuchar las notificaciones de pago de MercadoPago (webhooks) para actualizar el estado de los pagos en Airtable. Hay que adaptarlo para que busque y actualice los registros en la tabla `Contribuyentes`.
+        *   **`Cancelacion de planes.json`**: Este flujo también debe ser revisado para asegurar que cancela las suscripciones basándose en la información de la tabla `Contribuyentes`.
+    2.  **Puesta en Producción del Flujo Principal**:
+        *   Para que el flujo "Crear Suscripción" funcione de manera automática para cualquier usuario, se debe reemplazar la URL de prueba (`/webhook-test/`) en el botón de Airtable por la **URL de producción** (`/webhook/`) que provee el nodo Webhook en n8n.
+    3.  **Pruebas Integrales**:
+        *   Realizar pruebas del ciclo de vida completo: crear una suscripción, simular un pago, verificar que el flujo de actualización lo registre, y finalmente, probar la cancelación.
