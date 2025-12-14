@@ -222,3 +222,16 @@ async def mercadopago_webhook(payload: dict):
 
     print("MercadoPago Webhook recibido (sin data.id o topic conocido):", payload)
     return {"message": "Webhook received successfully (no action taken)"}
+
+
+@app.get("/success")
+async def payment_success():
+    return {"message": "Payment successful! Thank you for your payment."}
+
+@app.get("/pending")
+async def payment_pending():
+    return {"message": "Your payment is pending. We will notify you once it's processed."}
+
+@app.get("/failure")
+async def payment_failure():
+    return {"message": "Payment failed. Please try again or contact support."}
