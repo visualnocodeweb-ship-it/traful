@@ -131,10 +131,10 @@ async def initiate_payment(dni: str, monto: float):
         "notification_url": f"{BACKEND_PUBLIC_URL}/webhook/mercadopago", # <<-- USAR BACKEND_PUBLIC_URL
         "external_reference": dni # Usamos el DNI como referencia externa
         }
-        print(f"DEBUG: preference_data FINAL enviada a MercadoPago: {preference_data}") # <<-- NUEVO PRINT
-        try:
-            preference_response = sdk.preference().create(preference_data)
-            print("MercadoPago API Full Response:", preference_response)
+    print(f"DEBUG: preference_data FINAL enviada a MercadoPago: {preference_data}") # <<-- NUEVO PRINT
+    try:
+        preference_response = sdk.preference().create(preference_data)
+        print("MercadoPago API Full Response:", preference_response)
 
         if "status_code" in preference_response and preference_response["status_code"] >= 400:
             error_detail = preference_response.get("response", {}).get("message", "Error desconocido de MercadoPago")
